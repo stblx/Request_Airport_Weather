@@ -66,9 +66,7 @@
             xhr.onload = function() {
                 callback(xhr.responseText);
             };
-
-            // 将 URL 包装在一个对象中，然后发送为 JSON 字符串
-            xhr.send(JSON.stringify({ url: url }));
+            xhr.send();
         }
         function UTCtoCST(utcDateString,callback){
             utcDateString = utcDateString.replace(' ','T');
