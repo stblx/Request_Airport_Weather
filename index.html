@@ -63,8 +63,6 @@
         function ajaxAPI(url, callback) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
-            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-            xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onload = function() {
                 callback(xhr.responseText);
             };
@@ -102,7 +100,7 @@
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
             //https://aviationweather.gov/data/metar/
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAD&hours=0&order=id%2C-obs&sep=true&format=json
-            var text = 'https://www.aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&hours=0&order=id%2C-obs&sep=true&format=json';
+            var text = 'http://www.aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&hours=0&order=id%2C-obs&sep=true&format=json';
             ajaxAPI(text, function(responseText) {
                     responseText = responseText.substring(1, responseText.length-1);
                     var json = JSON.parse(responseText);
