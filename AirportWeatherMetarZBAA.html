@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>查询机场METAR</title>
+</head>
+<body>
+    <p id="ReadText"></p>
+    
+
+    <script type="text/javascript">
+        let RequestAirport = "ZBAA";
+
+        let url = window.location.search;
+        if(url != ""){
+            url = url.substring(1);
+            var datas = url.split('&');
+            RequestAirport = datas[0].split('=')[1];
+        }
+
+
+        var Alltext = "";
+        let jsonReading = {
+            "0":"洞",
+            "1":"邀",
+            "2":"两",
+            "3":"三",
+            "4":"四",
+            "5":"五",
+            "6":"六",
+            "7":"拐",
+            "8":"八",
+            "9":"九",
+            "A":"Alpha",
+            "B":"Bravo",
+            "C":"Charlie",
+            "D":"Delta",
+            "E":"Echo",
+            "F":"Foxtrot",
+            "G":"Golf",
+            "H":"Hotel",
+            "I":"India",
+            "J":"Juliet",
+            "K":"Kilo",
+            "L":"Lima",
+            "M":"Mike",
+            "N":"November",
+            "O":"Oscar",
+            "P":"Papa",
+            "Q":"Quebec",
+            "R":"Romeo",
+            "S":"Sierra",
+            "T":"Tango",
+            "U":"Uniform",
+            "V":"Victor",
+            "W":"Whiskey",
+            "X":"X-ray",
+            "Y":"Yankee",
+            "Z":"Zulu",
+            "-":"零下",
+            "+":"洞 洞 洞"
+        };
+        function ajaxAPI(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onload = function() {
+                callback(xhr.responseText);
+            };
+            xhr.send();
+        }
+        function UTCtoCST(utcDateString,callback){
+            utcDateString = utcDateString.replace(' ','T');
+            const utcDate = new Date(utcDateString);
+            const beijingDate = new Date(utcDate.getTime() + 8 * 60 * 60 * 1000);
+
+            let bjtimefinal = "";
+            bjtimefinal += beijingDate.getDate();
+            if(bjtimefinal.length == 1){
+                bjtimefinal = "0" + bjtimefinal;
+            }
+            
+            let bjtimehour = "";
+            bjtimehour += beijingDate.getHours();
+            if(bjtimehour.length == 1){
+                bjtimehour = "0" + bjtimehour;
+            }
+            bjtimefinal += bjtimehour;
+            
+            let bjtimemin = "";
+            bjtimemin += beijingDate.getMinutes();
+            if(bjtimemin.length == 1){
+                bjtimemin = "0" + bjtimemin;
+            }
+            bjtimefinal += bjtimemin;
+
+            callback(bjtimefinal);
+        }
+
+        function processSearchText(searchtext) {
+            //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
+            //https://aviationweather.gov/data/metar/
+            //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAD&hours=0&order=id%2C-obs&sep=true&format=json
+            var text = 'https://www.aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&hours=0&order=id%2C-obs&sep=true&format=json';
+            ajaxAPI(text, function(responseText) {
+                    responseText = responseText.substring(1, responseText.length-1);
+                    var json = JSON.parse(responseText);
+
+                    //ICAO
+                    var finalICAO = "";
+                    for(let i = 0; i < json.icaoId.length;i++){
+                        console.log(jsonReading[json.icaoId[i]])
+                        finalICAO += (jsonReading[json.icaoId[i]] + " ");
+                    };
+                    Alltext += "所选机场Metar, " + finalICAO + "。 ";
+                    //console.log(Alltext); 
+
+                    //通报时间
+                    var finalTime = "";
+                    var reportTimeInCode = json.rawOb.split(" ")[1];
+                    finalTime += (jsonReading[reportTimeInCode[0]] + " ");
+                    finalTime += (jsonReading[reportTimeInCode[1]] + ", ");
+                    finalTime += (jsonReading[reportTimeInCode[2]] + " ");
+                    finalTime += (jsonReading[reportTimeInCode[3]] + " ");
+                    finalTime += (jsonReading[reportTimeInCode[4]] + " ");
+                    finalTime += (jsonReading[reportTimeInCode[5]] + ", ");
+                    finalTime += (jsonReading[reportTimeInCode[6]] + " ");
+                    finalTime += "Time "; 
+                    Alltext += "通报UTC时间, " + finalTime + "。 ";
+
+                    //通报北京时间
+                    var finalBeijingTime = "";
+                    var reportBeijingTimeInCode = json.reportTime;
+                    UTCtoCST(reportBeijingTimeInCode, function(bjtime){
+                        for(let i = 0; i < bjtime.length;i++){
+                            console.log(jsonReading[bjtime[i]])
+                            finalBeijingTime += (jsonReading[bjtime[i]] + " ");
+										if(i == 1){
+											finalBeijingTime += ", ";
+										}
+                        };
+                        finalBeijingTime += "北京时 "; 
+                        Alltext += "通报北京时间, " + finalBeijingTime + "。 ";
+                    })
+
+                    
+                    //风
+                    var finalWind = "";
+                    var windir = "" + json.wdir;
+                    if(windir == "VRB"){
+                        finalWind += "风向不定。";
+                    }else{
+                        finalWind += "风向，";
+                        for(let i = 0; i < windir.length;i++){
+                            console.log(jsonReading[windir[i]])
+                            finalWind += (jsonReading[windir[i]] + " ");
+                        };
+                        finalWind += "度。 ";
+                    }
+                   
+
+                    finalWind += "风速, ";
+                    var windspeedMPS = "" + Math.round(json.wspd / 2);
+                    if(windspeedMPS < 10){
+                        finalWind += (jsonReading["0"] + " ");
+                    }
+                    for(let i = 0; i < windspeedMPS.length;i++){
+                        console.log(jsonReading[windspeedMPS[i]])
+                        finalWind += (jsonReading[windspeedMPS[i]] + " ");
+                    };
+
+                    if(json.wgst == null || json.wgst == 0){
+                        
+                    }else{
+                        finalWind += "米秒。 阵风， ";
+                        var windGspeedMPS = "" + Math.round(json.wgst / 2);
+                        if(windGspeedMPS < 10){
+                            finalWind += (jsonReading["0"] + " ");
+                        }
+                        for(let i = 0; i < windGspeedMPS.length;i++){
+                            console.log(jsonReading[windGspeedMPS[i]])
+                            finalWind += (jsonReading[windGspeedMPS[i]] + " ");
+                        };
+                    }
+                    
+
+                    Alltext += (finalWind + "米秒。");
+
+
+
+                    //温度
+                    var finaltem = "温度，";
+                    var temp = "" + json.temp;
+                    for(let i = 0; i < temp.length;i++){
+                        console.log(jsonReading[temp[i]])
+                        finaltem += (jsonReading[temp[i]] + " ");
+                    };
+                    Alltext += (finaltem + "度。 ");
+
+                    //湿度
+                    var finaldewp = "露点，";
+                    var dewp = "" + json.dewp;
+                    for(let i = 0; i < dewp.length;i++){
+                        console.log(jsonReading[dewp[i]])
+                        finaldewp += (jsonReading[dewp[i]] + " ");
+                    };
+                    Alltext += (finaldewp + "度。 ");
+
+                    //能见度
+                    var finalvisib = "能见度，";
+                    var visib = "" + json.visib;
+                    if(visib == "6+"){
+                        Alltext += ("能见度，大于" + jsonReading["1"] + " " + jsonReading["0"] + "千米。 ");
+                    }else{
+                        visib = "" + Math.round(json.visib * 1.6) + "+";
+                        for(let i = 0; i < visib.length;i++){
+                            console.log(jsonReading[visib[i]])
+                            finalvisib += (jsonReading[visib[i]] + " ");
+                        };
+                        Alltext += (finalvisib + "米。 ");
+                    }
+                    
+                    //气压
+                    var finalaltim = "修正海压，";
+                    var altim = "" + json.altim;
+                    for(let i = 0; i < altim.length;i++){
+                        console.log(jsonReading[altim[i]])
+                        finalaltim += (jsonReading[altim[i]] + " ");
+                    };
+                    Alltext += (finalaltim + "。 ");
+
+							console.log(Alltext);
+
+                    document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n\n\n\n"+Alltext;
+            });
+        }
+        processSearchText(RequestAirport);
+    </script>
+</body>
