@@ -97,11 +97,23 @@
             callback(bjtimefinal);
         }
 
+        function UNIXtoLocalTime(unixtime,callback){
+            const timestamp = unixtime; // UNIX时间戳
+            const date = new Date(timestamp * 1000); // UNIX时间戳以秒为单位，而JavaScript中的时间戳以毫秒为单位，所以需要乘以1000
+            const formattedDate = date.toLocaleString(); // 将日期转换为本地时间字符串格式
+            //console.log(formattedDate); // 输出：2021/3/21 下午12:00:00（输出的格式可能因浏览器和地区而异）
+            callback(formattedDate);
+        }
+
         function processSearchText(searchtext) {
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
             //https://aviationweather.gov/data/metar/
-            //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAD&hours=0&order=id%2C-obs&sep=true&format=json
-            var text = 'https://www.aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&hours=0&order=id%2C-obs&sep=true&format=json';
+            //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA&hours=0&order=id%2C-obs&sep=true&format=json
+            //https://aviationweather.gov/cgi-bin/data/taf.php?ids=ZBAA&format=json
+
+            //METAR
+
+            var text = 'https://www.aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&format=json';
             ajaxAPI(text, function(responseText) {
                     responseText = responseText.substring(1, responseText.length-1);
                     var json = JSON.parse(responseText);
@@ -135,9 +147,9 @@
                         for(let i = 0; i < bjtime.length;i++){
                             console.log(jsonReading[bjtime[i]])
                             finalBeijingTime += (jsonReading[bjtime[i]] + " ");
-										if(i == 1){
-											finalBeijingTime += ", ";
-										}
+                            if(i == 1){
+                                finalBeijingTime += ", ";
+                            }
                         };
                         finalBeijingTime += "北京时 "; 
                         Alltext += "通报北京时间, " + finalBeijingTime + "。 ";
@@ -151,6 +163,13 @@
                         finalWind += "风向不定。";
                     }else{
                         finalWind += "风向，";
+									if(windir.length==1){
+										finalWind += (jsonReading["0"] + " ");
+										finalWind += (jsonReading["0"] + " ");
+									}
+									if(windir.length==2){
+										finalWind += (jsonReading["0"] + " ");
+									}
                         for(let i = 0; i < windir.length;i++){
                             console.log(jsonReading[windir[i]])
                             finalWind += (jsonReading[windir[i]] + " ");
@@ -191,17 +210,25 @@
                     //温度
                     var finaltem = "温度，";
                     var temp = "" + json.temp;
+							var flagtemp = 0;
+							if(temp.length == 1){finaltem += (jsonReading["0"] + " ");}
+							else if(temp.length == 2 && temp[0]=="-"){flagtemp=1;}
                     for(let i = 0; i < temp.length;i++){
-                        console.log(jsonReading[temp[i]])
-                        finaltem += (jsonReading[temp[i]] + " ");
+                        console.log(jsonReading[temp[i]]);
+								if(flagtemp==1 && i == 1){finaltem += (jsonReading["0"] + " ");}
+                       finaltem += (jsonReading[temp[i]] + " ");
                     };
                     Alltext += (finaltem + "度。 ");
 
                     //湿度
                     var finaldewp = "露点，";
+							var flagtdewp = 0;
                     var dewp = "" + json.dewp;
+							if(dewp.length == 1){finaldewp += (jsonReading["0"] + " ");}
+							else if(dewp.length == 2 && dewp[0]=="-"){flagdewp=1;}
                     for(let i = 0; i < dewp.length;i++){
                         console.log(jsonReading[dewp[i]])
+								if(flagdewp==1 && i == 1){finaldewp += (jsonReading["0"] + " ");}
                         finaldewp += (jsonReading[dewp[i]] + " ");
                     };
                     Alltext += (finaldewp + "度。 ");
@@ -229,10 +256,22 @@
                     };
                     Alltext += (finalaltim + "。 ");
 
-							console.log(Alltext);
+                    console.log(Alltext);
 
-                    document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n\n\n\n"+Alltext;
+                    document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n"+Alltext + "\n\n\n\n";
             });
+
+
+            //TAF
+
+            var texttaf = 'https://www.aviationweather.gov/cgi-bin/data/taf.php?ids=' + searchtext + '&format=json';
+            ajaxAPI(texttaf, function(responseTexttaf) {
+                responseTexttaf = responseTexttaf.substring(1, responseTexttaf.length-1);
+                var jsontaf = JSON.parse(responseTexttaf);
+
+                UNIXtoLocalTime
+            })
+
         }
         processSearchText(RequestAirport);
     </script>
