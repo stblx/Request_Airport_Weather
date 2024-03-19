@@ -98,12 +98,15 @@
         }
 
         function UNIXtoLocalTime(unixtime,callback){
-            const timestamp = unixtime; // UNIX时间戳
-            const date = new Date(timestamp * 1000); // UNIX时间戳以秒为单位，而JavaScript中的时间戳以毫秒为单位，所以需要乘以1000
-            const formattedDate = date.toLocaleString(); // 将日期转换为本地时间字符串格式
-            //console.log(formattedDate); // 输出：2021/3/21 下午12:00:00（输出的格式可能因浏览器和地区而异）
+            const timestamp = unixtime;
+            const date = new Date(timestamp * 1000);
+            const formattedDate = date.toLocaleString();
+            //console.log(formattedDate);
             callback(formattedDate);
         }
+
+			function WeatherPhen(data){
+			}
 
         function processSearchText(searchtext) {
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
@@ -117,7 +120,7 @@
             ajaxAPI(text, function(responseText) {
                     responseText = responseText.substring(1, responseText.length-1);
                     var json = JSON.parse(responseText);
-
+							console.log(responseText)
                     //ICAO
                     var finalICAO = "";
                     for(let i = 0; i < json.icaoId.length;i++){
@@ -177,6 +180,27 @@
                         finalWind += "度。 ";
                     }
                    
+							var winddirall = json.rawOb.split(" ");
+						for(var i = 0;i<winddirall.length;i++){
+							let len=winddirall[i].length;
+							if(winddirall[i][len-3]=="M" && winddirall[i][len-2]=="P" &&winddirall[i][len-1]=="S"){
+								let j = i + 1;
+								if(winddirall[j][3] == "V" && winddirall[j].length == 7){
+									finalWind += ("具体风向， ");
+									for(let k = 0;k<=2;k++){
+										console.log(jsonReading[winddirall[j][k]]);
+                        		finalWind += (jsonReading[winddirall[j][k]] + " ");
+									}
+									finalWind += ("度，到， ");
+									for(let k = 4;k<=6;k++){
+										console.log(jsonReading[winddirall[j][k]]);
+                        		finalWind += (jsonReading[winddirall[j][k]] + " ");
+									}
+									finalWind += ("度。");
+								}
+							}
+						}
+                    
 
                     finalWind += "风速, ";
                     var windspeedMPS = "" + Math.round(json.wspd / 2);
@@ -187,6 +211,9 @@
                         console.log(jsonReading[windspeedMPS[i]])
                         finalWind += (jsonReading[windspeedMPS[i]] + " ");
                     };
+
+
+						
 
                     if(json.wgst == null || json.wgst == 0){
                         
@@ -201,7 +228,8 @@
                             finalWind += (jsonReading[windGspeedMPS[i]] + " ");
                         };
                     }
-                    
+
+							
 
                     Alltext += (finalWind + "米秒。");
 
@@ -225,7 +253,7 @@
 							var flagdewp = 0;
                     var dewp = "" + json.dewp;
 							if(dewp.length == 1){finaldewp += (jsonReading["0"] + " ");}
-							else if(dewp.length == 2 && dewp[0]=="-"){flagdewp=1;nv}
+							else if(dewp.length == 2 && dewp[0]=="-"){flagdewp=1;}
                     for(let i = 0; i < dewp.length;i++){
                         console.log(jsonReading[dewp[i]])
 								if(flagdewp==1 && i == 1){finaldewp += (jsonReading["0"] + " ");}
@@ -240,11 +268,14 @@
                         Alltext += ("能见度，大于" + jsonReading["1"] + " " + jsonReading["0"] + "千米。 ");
                     }else{
                         visib = "" + Math.round(json.visib * 1.6) + "+";
-                        for(let i = 0; i < visib.length;i++){
+								if(visib < 50){Alltext += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
+								}else{
+                        	for(let i = 0; i < visib.length;i++){
                             console.log(jsonReading[visib[i]])
                             finalvisib += (jsonReading[visib[i]] + " ");
-                        };
-                        Alltext += (finalvisib + "米。 ");
+                        	};
+                        	Alltext += (finalvisib + "米。 ");
+								}
                     }
                     
                     //气压
@@ -264,12 +295,18 @@
 
             //TAF
 
-            var texttaf = 'https://www.aviationweather.gov/cgi-bin/data/taf.php?ids=' + searchtext + '&format=json';
+            var texttaf = "https://aviationweather.gov/cgi-bin/data/taf.php?ids="+searchtext+"&format=json";
             ajaxAPI(texttaf, function(responseTexttaf) {
-                responseTexttaf = responseTexttaf.substring(1, responseTexttaf.length-1);
+               responseTexttaf = responseTexttaf.substring(1, responseTexttaf.length-1);
                 var jsontaf = JSON.parse(responseTexttaf);
-
-                UNIXtoLocalTime
+					
+					var taffinaltime = "";
+					//有效时间
+                UNIXtoLocalTime(jsontaf.validTimeFrom,function(timestd){
+							console.log(timestd);
+							
+							
+})
             })
 
         }
