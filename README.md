@@ -3,13 +3,13 @@
 
 更多讯息，请关注**B站** **三条波浪线**
 
-**https:/space.bilibili.com/452359038**
+https:/space.bilibili.com/452359038
 
 Use NOAA data,  analyze content, shortcut commands for iPhone or Siri to read aloud in Chinese.
 
 For more information, please follow **Bilibili** **三条波浪线**
 
-**https:/space.bilibili.com/452359038**
+https:/space.bilibili.com/452359038
 
 ## 使用方法（Usage）
 index.html?{0}={1}
