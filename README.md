@@ -1,7 +1,15 @@
 # Request_Airport_Weather 查询机场天气
 使用NOAA的数据，解析内容，适用于 iPhone 的快捷指令或 Siri 的中文朗读。
 
+更多讯息，请关注**B站** **三条波浪线**
+
+**https:/space.bilibili.com/452359038**
+
 Use NOAA data,  analyze content, shortcut commands for iPhone or Siri to read aloud in Chinese.
+
+For more information, please follow **Bilibili** **三条波浪线**
+
+**https:/space.bilibili.com/452359038**
 
 ## 使用方法（Usage）
 index.html?{0}={1}
@@ -19,11 +27,11 @@ For example: index.html?param=ZBAA
 ## 功能（Function）
 解析 Metar 报 和 TAF 报的内容，并用**中文**朗读。
 
-注意，**不是**通播，解析方法是作者自己写的代码。
+注意，**不是**通播，解析方法是作者stblx自己写的代码。
 
 Analyze the contents of Metar and TAF newspapers and read them aloud in Chinese.
 
-Note that ** is not ** broadcast, the parsing method is the code written by the author himself.
+Note that **is not** ATIS, the parsing method is the code written by the author called stblx.
 
 ## 快捷指令（Apple Shortcuts）
 网址（WebSite）：https://www.icloud.com/shortcuts/20a21ece6b3b4c25adab779c2749574d
