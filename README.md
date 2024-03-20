@@ -34,7 +34,8 @@ Analyze the contents of Metar and TAF newspapers and read them aloud in Chinese.
 Note that **is not** ATIS, the parsing method is the code written by the author called stblx.
 
 ## 快捷指令（Apple Shortcuts）
-网址（WebSite）：https://www.icloud.com/shortcuts/20a21ece6b3b4c25adab779c2749574d
+网址（WebSite）：
+https://www.icloud.com/shortcuts/9da83b0e82174154bb07c6d81895011d
 
 用法（Usage）：
 使用Github下载HTML文件，使用App Store中可以下载的**HTML Viewer App**，在App中选择HTML文件，然后使用这个Apple快捷方式使用。
