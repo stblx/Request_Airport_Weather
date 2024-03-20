@@ -14,7 +14,7 @@ index.html?{0}={1}
 **{0}** is any, the program does not set the variable name;
 **{1}** is the airport's **ICAO** code, directly join.
 
-For example：index.html?param=ZBAA
+For example: index.html?param=ZBAA
 
 ## 功能（Function）
 解析 Metar 报 和 TAF 报的内容，并用**中文**朗读。
