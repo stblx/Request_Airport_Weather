@@ -21,13 +21,12 @@
 
 
         var Alltext = "";
-        var metarok = 0;
-        var tafok = 0;
+        
         let jsonReading = {
             "0": "洞",
             "1": "邀",
             "2": "两",
-            "3": "三",
+            "3": "3",
             "4": "四",
             "5": "五",
             "6": "六",
@@ -182,7 +181,7 @@
                 finalTime += (jsonReading[reportTimeInCode[5]] + ", ");
                 finalTime += (jsonReading[reportTimeInCode[6]] + " ");
                 finalTime += "Time ";
-                Alltext += "通报UTC时间, " + finalTime + "。 ";
+                Alltext += "通报UTC时煎, " + finalTime + "。 ";
 
                 //通报北京时间
                 var finalBeijingTime = "";
@@ -226,6 +225,8 @@
                     let len = winddirall[i].length;
                     if (winddirall[i][len - 3] == "M" && winddirall[i][len - 2] == "P" && winddirall[i][len - 1] == "S") {
                         let j = i + 1;
+								if(j >= winddirall.length){console.log(j);break;}
+								if(winddirall[j].length != 7){console.log(j);continue;}
                         if (winddirall[j][3] == "V" && winddirall[j].length == 7) {
                             finalWind += ("具体风向， ");
                             for (let k = 0; k <= 2; k++) {
@@ -328,7 +329,6 @@
                     finalaltim += (jsonReading[altim[i]] + " ");
                 };
                 Alltext += (finalaltim + "。 ");
-                metarok = 1;
                 console.log(Alltext);
 
                 document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n" + Alltext + "\n\n\n\n";
@@ -357,7 +357,7 @@
                 var taffinaltime = "";
                 UNIXtoLocalTime(jsontaf.validTimeFrom, function (timestd) {
                     console.log(timestd);
-                    taffinaltime += "TAF有效时间，";
+                    taffinaltime += "TAF有效时煎，";
                     for (let i = 0; i < timestd.length; i++) {
                         console.log(jsonReading[timestd[i]])
                         taffinaltime += (jsonReading[timestd[i]] + " ");
@@ -391,7 +391,7 @@
                 UNIXtoLocalTime(timemax.validTime, function (timestd) {
                     console.log(timestd);
 
-                    taffinaltemp += "最高温度，";
+                    taffinaltemp += "预计，最高温度，";
                     
                     var sfctempmax = "" + timemax.sfcTemp;
                     var flagtemp = 0;
@@ -441,7 +441,110 @@
                     taffinaltemp += "北京时，时达到。";
                 })
                 tafall += taffinaltemp;
-                tafok = 1;
+
+
+
+						//风
+						var finalWind = "";
+						console.log(finalWind)
+                var windir = "" + jsontaf.fcsts[0].wdir;
+                if (windir == "VRB") {
+                    finalWind += "风向不定。";
+                } else {
+                    finalWind += "风向，";
+                    if (windir.length == 1) {
+                        finalWind += (jsonReading["0"] + " ");
+                        finalWind += (jsonReading["0"] + " ");
+                    }
+                    if (windir.length == 2) {
+                        finalWind += (jsonReading["0"] + " ");
+                    }
+                    for (let i = 0; i < windir.length; i++) {
+                        console.log(jsonReading[windir[i]])
+                        finalWind += (jsonReading[windir[i]] + " ");
+                    };
+                    finalWind += "度。 ";
+                }
+console.log(finalWind)
+                var winddirall = jsontaf.rawTAF.split(" ");
+console.log(winddirall)
+                for (var i = 0; i < winddirall.length; i++) {
+                    let len = winddirall[i].length;
+                    if (winddirall[i][len - 3] == "M" && winddirall[i][len - 2] == "P" && winddirall[i][len - 1] == "S") {
+                        var j = i + 1;
+								if(j >= winddirall.length){console.log(j);break;}
+								if(winddirall[j].length < 7 || winddirall[j].length > 7){console.log("aaa"+winddirall[j].length);continue;}
+                        if (winddirall[j][3] == "V" && winddirall[j].length == 7) {
+console.log("bb"+j)
+                            finalWind += ("具体风向， ");
+                            for (let k = 0; k <= 2; k++) {
+                                console.log(jsonReading[winddirall[j][k]]);
+                                finalWind += (jsonReading[winddirall[j][k]] + " ");
+                            }
+                            finalWind += ("度，到， ");
+                            for (let k = 4; k <= 6; k++) {
+                                console.log(jsonReading[winddirall[j][k]]);
+                                finalWind += (jsonReading[winddirall[j][k]] + " ");
+                            }
+                            finalWind += ("度。");
+                        }
+                    }
+                }
+
+						console.log(finalWind);
+                finalWind += "风速, ";
+                var windspeedMPS = "" + Math.round(jsontaf.fcsts[0].wspd / 2);
+                if (windspeedMPS < 10) {
+                    finalWind += (jsonReading["0"] + " ");
+                }
+                for (let i = 0; i < windspeedMPS.length; i++) {
+                    console.log(jsonReading[windspeedMPS[i]])
+                    finalWind += (jsonReading[windspeedMPS[i]] + " ");
+                };
+						
+						if(jsontaf.fcsts[0].wgst == null || jsontaf.fcsts[0].wgst == 0) {
+
+                } else {
+                    finalWind += "米秒。 阵风， ";
+                    var windGspeedMPS = "" + Math.round(json.wgst / 2);
+                    if (windGspeedMPS < 10) {
+                        finalWind += (jsonReading["0"] + " ");
+                    }
+                    for (let i = 0; i < windGspeedMPS.length; i++) {
+                        console.log(jsonReading[windGspeedMPS[i]])
+                        finalWind += (jsonReading[windGspeedMPS[i]] + " ");
+                    };
+                }
+
+console.log(finalWind)
+
+                tafall += (finalWind + "米秒。");
+
+					//能见度
+                var finalvisib = "能见度，";
+                var visib = "" + jsontaf.fcsts[0].visib;
+console.log(visib)
+                if (visib == "6+") {
+                    tafall += ("能见度，大于" + jsonReading["1"] + " " + jsonReading["0"] + "千米。 ");
+console.log(tafall);
+                } else {
+                    visib = "" + Math.round(jsontaf.fcsts[0].visib * 1.6) + "+";
+                    if (visib < 50) {
+                        tafall += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
+console.log(tafall);
+                    } else {
+                        for (let i = 0; i < visib.length; i++) {
+                            console.log(jsonReading[visib[i]])
+                            finalvisib += (jsonReading[visib[i]] + " ");
+                        };
+                        tafall += (finalvisib + "米。 ");
+console.log(tafall);
+                    }
+                }
+
+
+					//Output
+                
                 console.log(tafall);
                 
                 document.getElementById('ReadText').innerText = metarall + tafall;
