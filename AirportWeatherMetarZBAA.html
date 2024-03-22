@@ -21,7 +21,7 @@
 
 
         var Alltext = "";
-        
+
         let jsonReading = {
             "0": "洞",
             "1": "腰",
@@ -66,14 +66,39 @@
         let jsonweathercondition = {
             "-": "轻微的",
             "+": "重度的",
-            "MI": "浅薄",
-            "BC": "一块",
+            "MI": "浅的",
+            "BC": "散片状的",
             "PR": "一部分",
-            "BL": "吹风",
+            "BL": "风吹",
             "DR": "飘动",
-            "SH": "一阵",
+            "SH": "阵性的",
             "FZ": "冰冻",
-            "VC": "机场附近"
+            "VC": "机场附近",
+            "TS": "雷暴"
+        };
+
+        let jsonweatherphen = {
+            "DZ": "毛毛雨",
+            "RA": "雨",
+            "SN": "雪",
+            "SG": "米雪",
+            "IC": "冰针 或 冰晶",
+            "PL": "冰粒",
+            "PE": "冰粒",
+            "GR": "冰雹",
+            "GS": "小冰雹",
+            "BR": "轻雾",
+            "FG": "雾",
+            "FU": "烟",
+            "VA": "火山灰",
+            "DU": "浮沉",
+            "SA": "扬沙",
+            "HZ": "霾",
+            "PO": "发展完好的沙卷或尘卷",
+            "SQ": "飑",
+            "FC": "漏斗云 或 龙卷风",
+            "SS": "沙暴",
+            "DS": "尘暴"
         };
 
 
@@ -148,7 +173,7 @@
 
         }
 
-        function processSearchText(searchtext,callback) {
+        function processSearchText(searchtext, callback) {
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
             //https://aviationweather.gov/data/metar/
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA&hours=0&order=id%2C-obs&sep=true&format=json
@@ -225,8 +250,8 @@
                     let len = winddirall[i].length;
                     if (winddirall[i][len - 3] == "M" && winddirall[i][len - 2] == "P" && winddirall[i][len - 1] == "S") {
                         let j = i + 1;
-								if(j >= winddirall.length){console.log(j);break;}
-								if(winddirall[j].length != 7){console.log(j);continue;}
+                        if (j >= winddirall.length) { console.log(j); break; }
+                        if (winddirall[j].length != 7) { console.log(j); continue; }
                         if (winddirall[j][3] == "V" && winddirall[j].length == 7) {
                             finalWind += ("具体风向， ");
                             for (let k = 0; k <= 2; k++) {
@@ -242,7 +267,7 @@
                         }
                     }
                 }
-
+                console.log(finalWind);
 
                 finalWind += "风速, ";
                 var windspeedMPS = "" + Math.round(json.wspd / 2);
@@ -271,11 +296,124 @@
                     };
                 }
 
-
-
                 Alltext += (finalWind + "米秒。");
 
+                //CAVOK
+                for (var i = 2; i < winddirall.length; i++) {
+                    if(winddirall[i] == "CAVOK"){
+                        console.log("CAVOK");
+                        Alltext += "好天气，CAVOK。";
+                    }
+                }
 
+                //天气现象
+                var wxString = json.wxString;
+                var finalwxs = "";
+                if (wxString != null) {
+                    var wxarr = wxString.split(" ");
+                    for (let i = 0; i < wxarr.length; i++) {
+                        if (wxarr[i].length == 2) {
+                            console.log(jsonweatherphen[wxarr[i]]);
+                            finalwxs += jsonweatherphen[wxarr[i]] + "。";
+                        } else if (wxarr[i].length == 3) {
+                            var str = wxarr[i][1] + wxarr[i][2];
+                            finalwxs += (jsonweathercondition[wxarr[i][0]] + jsonweatherphen[str] + "。");
+                            console.log(finalwxs);
+                        } else if (wxarr[i].length == 4) {
+                            var str1 = wxarr[i][0] + wxarr[i][1];
+                            var str2 = wxarr[i][2] + wxarr[i][3];
+                            finalwxs += (jsonweathercondition[str1] + jsonweatherphen[str2] + "。");
+                            console.log(finalwxs);
+                        }
+                    }
+                }
+                Alltext += finalwxs;
+
+                //云底高
+                var finalcloud = "";
+                for (var i = 2; i < winddirall.length; i++) {
+                    if(winddirall[i].includes("FEW")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "少云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("SCT")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "疏云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("BKN")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "多云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("OVC")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "阴天，满天云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("NSC")){
+                        finalcloud += "云层无显著影响。";
+                        console.log(finalcloud);
+                    }else{
+                        continue;
+                    }
+                }
+                Alltext += finalcloud;
+
+                //能见度
+                var finalvisib = "能见度，";
+                var visib = "" + json.visib;
+                if (visib == "6+") {
+                    Alltext += ("能见度，大于" + jsonReading["1"] + " " + jsonReading["0"] + "千米。 ");
+                } else {
+                    visib = "" + Math.round(json.visib * 1.6) + "+";
+                    if (visib < 50) {
+                        Alltext += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
+                    } else {
+                        for (let i = 0; i < visib.length; i++) {
+                            console.log(jsonReading[visib[i]])
+                            finalvisib += (jsonReading[visib[i]] + " ");
+                        };
+                        Alltext += (finalvisib + "米。 ");
+                    }
+                }
 
                 //温度
                 var finaltem = "温度，";
@@ -303,24 +441,6 @@
                 };
                 Alltext += (finaldewp + "度。 ");
 
-                //能见度
-                var finalvisib = "能见度，";
-                var visib = "" + json.visib;
-                if (visib == "6+") {
-                    Alltext += ("能见度，大于" + jsonReading["1"] + " " + jsonReading["0"] + "千米。 ");
-                } else {
-                    visib = "" + Math.round(json.visib * 1.6) + "+";
-                    if (visib < 50) {
-                        Alltext += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
-                    } else {
-                        for (let i = 0; i < visib.length; i++) {
-                            console.log(jsonReading[visib[i]])
-                            finalvisib += (jsonReading[visib[i]] + " ");
-                        };
-                        Alltext += (finalvisib + "米。 ");
-                    }
-                }
-
                 //气压
                 var finalaltim = "修正海压，";
                 var altim = "" + json.altim;
@@ -332,14 +452,14 @@
                 console.log(Alltext);
 
                 document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n" + Alltext + "\n\n\n\n";
-                callback("\n\n\n\n\n\n\n\n" + Alltext + "\n\n\n\n",searchtext);
+                callback("\n\n\n\n\n\n\n\n" + Alltext + "\n\n\n\n", searchtext);
             });
 
 
-            
+
 
         }
-        processSearchText(RequestAirport,function(metarall,searchtext){
+        processSearchText(RequestAirport, function (metarall, searchtext) {
             //TAF
             var texttaf = "https://aviationweather.gov/cgi-bin/data/taf.php?ids=" + searchtext + "&format=json";
 
@@ -392,7 +512,7 @@
                     console.log(timestd);
 
                     taffinaltemp += "预计，最高温度，";
-                    
+
                     var sfctempmax = "" + timemax.sfcTemp;
                     var flagtemp = 0;
                     if (sfctempmax.length == 1) { taffinaltemp += (jsonReading["0"] + " "); }
@@ -444,9 +564,9 @@
 
 
 
-						//风
-						var finalWind = "";
-						console.log(finalWind)
+                //风
+                var finalWind = "";
+                console.log(finalWind);
                 var windir = "" + jsontaf.fcsts[0].wdir;
                 if (windir == "VRB") {
                     finalWind += "风向不定。";
@@ -465,17 +585,17 @@
                     };
                     finalWind += "度。 ";
                 }
-console.log(finalWind)
+                console.log(finalWind)
+
                 var winddirall = jsontaf.rawTAF.split(" ");
-console.log(winddirall)
+                console.log(winddirall)
                 for (var i = 0; i < winddirall.length; i++) {
                     let len = winddirall[i].length;
                     if (winddirall[i][len - 3] == "M" && winddirall[i][len - 2] == "P" && winddirall[i][len - 1] == "S") {
                         var j = i + 1;
-								if(j >= winddirall.length){console.log(j);break;}
-								if(winddirall[j].length < 7 || winddirall[j].length > 7){console.log("aaa"+winddirall[j].length);continue;}
+                        if (j >= winddirall.length) { console.log(j); break; }
+                        if (winddirall[j].length < 7 || winddirall[j].length > 7) { console.log("aaa" + winddirall[j].length); continue; }
                         if (winddirall[j][3] == "V" && winddirall[j].length == 7) {
-console.log("bb"+j)
                             finalWind += ("具体风向， ");
                             for (let k = 0; k <= 2; k++) {
                                 console.log(jsonReading[winddirall[j][k]]);
@@ -491,9 +611,10 @@ console.log("bb"+j)
                     }
                 }
 
-						console.log(finalWind);
+                console.log(finalWind);
                 finalWind += "风速, ";
                 var windspeedMPS = "" + Math.round(jsontaf.fcsts[0].wspd / 2);
+                console.log(windspeedMPS)
                 if (windspeedMPS < 10) {
                     finalWind += (jsonReading["0"] + " ");
                 }
@@ -501,12 +622,13 @@ console.log("bb"+j)
                     console.log(jsonReading[windspeedMPS[i]])
                     finalWind += (jsonReading[windspeedMPS[i]] + " ");
                 };
-						
-						if(jsontaf.fcsts[0].wgst == null || jsontaf.fcsts[0].wgst == 0) {
+
+                console.log(jsontaf.fcsts[0].wgst);
+                if (jsontaf.fcsts[0].wgst == null || jsontaf.fcsts[0].wgst == 0) {
 
                 } else {
                     finalWind += "米秒。 阵风， ";
-                    var windGspeedMPS = "" + Math.round(json.wgst / 2);
+                    var windGspeedMPS = "" + Math.round(jsontaf.fcsts[0].wgst / 2);
                     if (windGspeedMPS < 10) {
                         finalWind += (jsonReading["0"] + " ");
                     }
@@ -515,38 +637,172 @@ console.log("bb"+j)
                         finalWind += (jsonReading[windGspeedMPS[i]] + " ");
                     };
                 }
-
-console.log(finalWind)
-
+                console.log(finalWind);
                 tafall += (finalWind + "米秒。");
 
-					//能见度
+                //CAVOK
+                for (var i = 0; i < winddirall.length; i++) {
+                    if(winddirall[i] == "CAVOK"){
+                        console.log("CAVOK");
+                        tafall += "好天气，CAVOK。";
+                    }
+                }
+
+                //天气现象
+                var wxString = jsontaf.fcsts[0].wxString;
+                var finalwxs = "";
+                if (wxString != null) {
+                    var wxarr = wxString.split(" ");
+                    for (let i = 0; i < wxarr.length; i++) {
+                        if (wxarr[i].length == 2) {
+                            console.log(jsonweatherphen[wxarr[i]]);
+                            finalwxs += jsonweatherphen[wxarr[i]] + "。";
+                        } else if (wxarr[i].length == 3) {
+                            var str = wxarr[i][1] + wxarr[i][2];
+                            finalwxs += (jsonweathercondition[wxarr[i][0]] + jsonweatherphen[str] + "。");
+                            console.log(finalwxs);
+                        } else if (wxarr[i].length == 4) {
+                            var str1 = wxarr[i][0] + wxarr[i][1];
+                            var str2 = wxarr[i][2] + wxarr[i][3];
+                            finalwxs += (jsonweathercondition[str1] + jsonweatherphen[str2] + "。");
+                            console.log(finalwxs);
+                        }
+                    }
+                }
+                tafall += finalwxs;
+
+                //云底高
+                var finalcloud = "";
+                for (var i = 2; i < winddirall.length; i++) {
+                    if(winddirall[i].includes("FEW")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "少云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("SCT")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "疏云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("BKN")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "多云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("OVC")){
+                        var strcloud = winddirall[i].substring(3,6);
+                        var ncloud = parseInt(strcloud) * 30;
+                        strcloud = "" + ncloud;
+                        if(strcloud.length == 2){
+                            strcloud = "0" + strcloud;
+                        }
+                        finalcloud += "阴天，满天云，云底高，";
+                        for (let j = 0; j < strcloud.length; j++) {
+                            console.log(jsonReading[strcloud[j]])
+                            finalcloud += (jsonReading[strcloud[j]] + " ");
+                        };
+                        finalcloud += "米。";
+                        console.log(finalcloud);
+                    }else if(winddirall[i].includes("NSC")){
+                        finalcloud += "云层无显著影响。";
+                        console.log(finalcloud);
+                    }else{
+                        continue;
+                    }
+                }
+                tafall += finalcloud;
+
+                //能见度
                 var finalvisib = "能见度，";
                 var visib = "" + jsontaf.fcsts[0].visib;
-console.log(visib)
+                var nvis = jsontaf.fcsts[0].visib;
+                console.log(visib);
                 if (visib == "6+") {
                     tafall += ("能见度，大于" + jsonReading["1"] + " " + jsonReading["0"] + "千米。 ");
-console.log(tafall);
+                    console.log(tafall);
                 } else {
-                    visib = "" + Math.round(jsontaf.fcsts[0].visib * 1.6) + "+";
-                    if (visib < 50) {
+                    nvis = nvis * 1.6;
+                    visib = "" + nvis;
+                    if (nvis < 0.05) {
                         tafall += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
-console.log(tafall);
-                    } else {
+                        console.log(tafall);
+                    } else if (nvis < 0.8) {
+                        nvis = nvis * 10;
+                        nvis = nvis * 2;
+                        nvis = Math.round(nvis);
+                        nvis = nvis / 2;
+                        nvis = nvis * 100;
+                        console.log(nvis);
+
+                        visib = "" + nvis;
+
                         for (let i = 0; i < visib.length; i++) {
                             console.log(jsonReading[visib[i]])
                             finalvisib += (jsonReading[visib[i]] + " ");
                         };
                         tafall += (finalvisib + "米。 ");
-console.log(tafall);
+                        console.log(tafall);
+                    } else if (nvis < 5) {
+                        nvis = nvis * 10;
+                        nvis = Math.round(nvis);
+                        nvis = nvis * 100;
+                        console.log(nvis);
+
+                        visib = "" + nvis;
+
+                        for (let i = 0; i < visib.length; i++) {
+                            console.log(jsonReading[visib[i]])
+                            finalvisib += (jsonReading[visib[i]] + " ");
+                        };
+                        tafall += (finalvisib + "米。 ");
+                        console.log(tafall);
+                    } else {
+                        nvis = Math.round(nvis);
+                        nvis = nvis * 1000;
+                        visib = "" + nvis;
+
+                        for (let i = 0; i < visib.length; i++) {
+                            console.log(jsonReading[visib[i]])
+                            finalvisib += (jsonReading[visib[i]] + " ");
+                        };
+                        tafall += (finalvisib + "米。 ");
+                        console.log(tafall);
                     }
                 }
 
+                
 
-					//Output
-                
+                //Output
+
                 console.log(tafall);
-                
+
                 document.getElementById('ReadText').innerText = metarall + tafall;
 
             })
