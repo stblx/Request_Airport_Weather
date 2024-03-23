@@ -351,7 +351,7 @@
                 finalvisib += ("能见度，大于 " + jsonReading["1"] + " " + jsonReading["0"] + " 签米。 ");
                 console.log(finalvisib);
             } else {
-                nvis = parseInt(nvis);
+                nvis = parseFloat(nvis);
                 nvis = nvis * 1.6;
                 visib = "" + nvis;
                 if (nvis < 0.05) {
@@ -803,6 +803,7 @@
                                 finalBECMG += ("气象转变概率为，" + data + " 。 ");
                             })
                         }
+
                         tafall += finalBECMG;
                     }
 
@@ -819,9 +820,10 @@
 
                         if (jsontaf.fcsts[timegroup].probability != null) {
                             WordToOutput(jsontaf.fcsts[timegroup].probability, [], function (data) {
-                                finalBECMG += ("气象转变概率为，" + data + " 。 ");
+                                finalTEMPO += ("气象转变概率为，" + data + " 。 ");
                             })
                         }
+
                         tafall += finalTEMPO;
                     }
 
@@ -838,10 +840,29 @@
 
                         if (jsontaf.fcsts[timegroup].probability != null) {
                             WordToOutput(jsontaf.fcsts[timegroup].probability, [], function (data) {
-                                finalBECMG += ("气象转变概率为，" + data + " 。 ");
+                                finalFM += ("气象转变概率为，" + data + " 。 ");
                             })
                         }
                         tafall += finalFM;
+                    }
+
+                    if (timegroup != 0 && jsontaf.fcsts[timegroup].fcstChange == "PROB") {
+                        var finalPROB = "预计概率性天气从，";
+                        UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeFrom, function (timestd) {
+                            finalPROB += ("" + timestd + "北京时，到， ");
+                            console.log(finalPROB);
+                        });
+                        UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeTo, function (timestd) {
+                            finalPROB += (timestd + "北京时，结束此阶段概率性天气。");
+                            console.log(finalPROB);
+                        });
+
+                        if (jsontaf.fcsts[timegroup].probability != null) {
+                            WordToOutput(jsontaf.fcsts[timegroup].probability, [], function (data) {
+                                finalPROB += ("气象转变概率为，" + data + " 。 ");
+                            })
+                        }
+                        tafall += finalPROB;
                     }
 
                     //风_全部
