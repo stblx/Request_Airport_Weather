@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>查询机场METAR</title>
+    <title>查询机场天气METAR&TAF</title>
 </head>
 
 <body>
@@ -400,7 +400,7 @@
 
                 //ICAO
                 AirportICAO(json.icaoId, function (data) {
-                    Alltext += "所选机场Metar播报, " + data + "。 ";
+                    Alltext += "所选机场Meter播报, " + data + "。 ";
                     console.log(Alltext);
                 });
 
@@ -489,7 +489,7 @@
                 for (let i = 2; i < rawtext.length; i++) {
                     if(rawtext[i] == "NOSIG"){
                         console.log("NOSIG");
-                        Alltext += "天气无明显变化，NOSIG。";
+                        Alltext += "天气无明显变化，NO，SIG。";
                     }
                 }
 
@@ -609,7 +609,7 @@
                         for (var i = 0; i < rawtext.length; i++) {
                             if (rawtext[i] == "CAVOK") {
                                 console.log("CAVOK");
-                                tafall += "好天气，CAVOK。";
+                                tafall += "好天气，CAV，OK。";
                             }
                         }
                     }
