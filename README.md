@@ -31,12 +31,16 @@ For example: ZBAAAirportWeatherMetar.html?param=ZBAA
 其中，**{0}** 为机场 **ICAO** 码，直接加入；
 **{1}** 为自定义名称，随意添加。
 
+在 iPhone/iPad 上，在 文件应用（Files）里，进入 **Html Viewer** 文件夹，长摁文件，点击“修改名称”，将前四位改成想要查询机场的 **ICAO** 码，点击确定保存即可。
+
 例如：ZBAAAirportWeatherMetar.html
 
 ZBADWeather.html
 
 **{0}** is the airport's **ICAO** code, directly join;
 **{1}** is any.
+
+On iPhone/iPad, in Files App, go to the **Html Viewer** folder, long press the file, click "Rename File", change the first four letters to the **ICAO** code of the airport you want to query, click OK to save.
 
 For example: ZBAAAirportWeatherMetar.html
 
