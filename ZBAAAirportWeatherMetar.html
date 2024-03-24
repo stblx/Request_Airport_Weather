@@ -314,9 +314,13 @@
             callback(finalWind);
         }
 
-        function CloudsHeight(clouds, callback) {
+        function CloudsHeight(clouds,codemetar = -1, callback) {
             var finalcloud = "";
-
+            var cloudtype = "";
+            if (codemetar != "-1"){
+                cloudtype = "，" + jsonCloudstype[codemetar];
+            }
+        
             for (let cloudsgroup = 0; cloudsgroup < clouds.length; cloudsgroup++) {
                 if (clouds[cloudsgroup]["cover"] == "CAVOK" || clouds[cloudsgroup]["cover"] == "NSC" || clouds[cloudsgroup]["cover"] == "CLR" || clouds[cloudsgroup]["cover"] == "SKC" || clouds[cloudsgroup]["cover"] == null) {
                     finalcloud += "云层无险著影响 ";
@@ -355,6 +359,7 @@
                     }
                 } else { }
             }
+            finalcloud += cloudtype;
             callback(finalcloud);
         }
 
@@ -610,17 +615,17 @@
                 });
 
                 console.log(arrForecast);
-                for (let i = 0; i < arrForecast.length; i++) {
-                    if (arrForecast[i].includes("CB")) {
-                        json.clouds[0]["type"] = "CB";
+                var metarfirstclouds = "-1";
+                for (let i = 0; i < arrForecast[0].length; i++) {
+                    if (arrForecast[0][i].includes("CB")) {
+                        metarfirstclouds = "CB";
                     }
-                    if (arrForecast[i].includes("TCU")) {
-                        json.clouds[0]["type"] = "TCU";
+                    if (arrForecast[0][i].includes("TCU")) {
+                        metarfirstclouds = "TCU";
                     }
                 }
-                console.log(json.clouds)
                 //云底高
-                CloudsHeight(json.clouds, function (data) {
+                CloudsHeight(json.clouds, metarfirstclouds,function (data) {
                     Alltext += data;
                     console.log(Alltext);
                 });
@@ -713,10 +718,11 @@
                     var nowcnt = 2;
                     if (arrfore[1].length == 2) {
                         stroldutctime += arrfore[2];
-                        nowcnt += 1;
+                        nowcnt = 3;
                     } else {
                         stroldutctime = arrfore[1].substring(2);
                     }
+                    stroldutctime = "" + stroldutctime;
                     var hour = parseInt(stroldutctime.substring(0, 2));
                     hour += 8;
                     if (hour >= 24) {
@@ -759,6 +765,8 @@
                         if (arrfore[i] == "CAVOK") {
                             console.log("CAVOK");
                             finaltg += "好天气，CAV，OK。";
+                        }
+
                             try {
                                 //能见度
                                 if (/^\d{4}$/.test(arrfore[i])) {
