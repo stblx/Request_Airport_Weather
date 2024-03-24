@@ -12,17 +12,35 @@ For more information, please follow **Bilibili** **三条波浪线**
 https://space.bilibili.com/452359038
 
 ## 使用方法（Usage）
-index.html?{0}={1}
+### 添加网址参数 （Add Website Param）
+.\ZBAAAirportWeatherMetar.html?{0}={1}
 
 其中，**{0}** 为任意，程序未设置变量名称；
 **{1}** 为机场的 **ICAO** 码，直接加入。
 
-例如：index.html?param=ZBAA
+例如：ZBAAAirportWeatherMetar.html?param=ZBAA
 
 **{0}** is any, the program does not set the variable name;
 **{1}** is the airport's **ICAO** code, directly join.
 
-For example: index.html?param=ZBAA
+For example: ZBAAAirportWeatherMetar.html?param=ZBAA
+
+### 修改文件名称 （Rename File Name）
+{0}{1}.html
+
+其中，**{0}** 为机场 **ICAO** 码，直接加入；
+**{1}** 为自定义名称，随意添加。
+
+例如：ZBAAAirportWeatherMetar.html
+
+ZBADWeather.html
+
+**{0}** is the airport's **ICAO** code, directly join;
+**{1}** is any.
+
+For example: ZBAAAirportWeatherMetar.html
+
+ZBADWeather.html
 
 ## 功能（Function）
 解析 Metar 报 和 TAF 报的内容，并用**中文**朗读。
