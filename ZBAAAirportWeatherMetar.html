@@ -314,13 +314,13 @@
             callback(finalWind);
         }
 
-        function CloudsHeight(clouds,codemetar = -1, callback) {
+        function CloudsHeight(clouds, codemetar = -1, callback) {
             var finalcloud = "";
             var cloudtype = "";
-            if (codemetar != "-1"){
+            if (codemetar != "-1") {
                 cloudtype = "，" + jsonCloudstype[codemetar];
             }
-        
+
             for (let cloudsgroup = 0; cloudsgroup < clouds.length; cloudsgroup++) {
                 if (clouds[cloudsgroup]["cover"] == "CAVOK" || clouds[cloudsgroup]["cover"] == "NSC" || clouds[cloudsgroup]["cover"] == "CLR" || clouds[cloudsgroup]["cover"] == "SKC" || clouds[cloudsgroup]["cover"] == null) {
                     finalcloud += "云层无险著影响 ";
@@ -625,7 +625,7 @@
                     }
                 }
                 //云底高
-                CloudsHeight(json.clouds, metarfirstclouds,function (data) {
+                CloudsHeight(json.clouds, metarfirstclouds, function (data) {
                     Alltext += data;
                     console.log(Alltext);
                 });
@@ -756,6 +756,7 @@
                     } else { }
 
                     for (let i = nowcnt; i < arrfore.length; i++) {
+                        console.log("iiii" + i);
                         if (arrfore[i] == "NSW") {
                             console.log("NSW");
                             WordToOutput("NSW", [], function (dataword) {
@@ -767,27 +768,30 @@
                             finaltg += "好天气，CAV，OK。";
                         }
 
-                            try {
-                                //能见度
-                                if (/^\d{4}$/.test(arrfore[i])) {
-                                    WordToOutput(arrfore[i], [], function (datavis) {
-                                        finaltg += ("能见度为， " + datavis + " 米。");
-                                    });
-                                }
-                            } catch { };
-                            try {
-                                //气象
-                                finaltg += (jsonweatherphen[arrfore[i]] + "。 ");
-                            } catch { };
-                            try {
-                                CloudsHeight(json.clouds, function (data) {
-                                    finaltg += data;
-                                    console.log(finaltg);
+                        try {
+                            //能见度
+                            if (/^\d{4}$/.test(arrfore[i])) {
+                                WordToOutput(arrfore[i], [], function (datavis) {
+                                    finaltg += ("能见度为， " + datavis + " 米。");
                                 });
-                            } catch { }
-                        }
-                        Alltext += finaltg;
+                            }
+                        } catch { };
+                        try {
+                            //气象
+                            if (jsonweatherphen[arrfore[i]] == null || jsonweatherphen[arrfore[i]] == undefined) { }
+                            else {
+                                finaltg += (jsonweatherphen[arrfore[i]] + "。 ");
+                            }
+                        } catch { };
+                        /*
+                        try {
+                            CloudsHeight(json.clouds, "-1", function (data) {
+                                finaltg += data;
+                                console.log(finaltg);
+                            });
+                        } catch { }*/
                     }
+                    Alltext += finaltg;
                 }
 
                 //document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n" + Alltext + "\n\n\n\n";
@@ -1013,7 +1017,7 @@
                     });
 
                     //云底高
-                    CloudsHeight(jsontaf.fcsts[timegroup].clouds, function (data) {
+                    CloudsHeight(jsontaf.fcsts[timegroup].clouds, "-1", function (data) {
                         tafall += data;
                         console.log(tafall);
                     });
