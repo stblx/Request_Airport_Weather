@@ -315,13 +315,19 @@
                         finalcloud += "，CAV，OK";
                     }
                     if (clouds[cloudsgroup]["cover"] == "NSC") {
-                        finalcloud += "，N，S，C";
+                        WordToOutput(clouds[cloudsgroup]["cover"], [], function (dataword) {
+                            finalcloud += ("，代码，" + dataword);
+                        });
                     }
                     if (clouds[cloudsgroup]["cover"] == "CLR") {
-                        finalcloud += "，C，L，R";
+                        WordToOutput(clouds[cloudsgroup]["cover"], [], function (dataword) {
+                            finalcloud += ("，代码，" + dataword);
+                        });
                     }
                     if (clouds[cloudsgroup]["cover"] == "SKC") {
-                        finalcloud += "，碧空，S，K，C";
+                        WordToOutput(clouds[cloudsgroup]["cover"], [], function (dataword) {
+                            finalcloud += ("，碧空，代码，" + dataword);
+                        });
                     }
                     finalcloud += "。";
                 } else if (clouds[cloudsgroup]["base"] != "null") {
@@ -579,7 +585,7 @@
                 for (var i = 2; i < rawtext.length; i++) {
                     if (rawtext[i] == "CAVOK") {
                         console.log("CAVOK");
-                        Alltext += "好天气，CAVOK。";
+                        Alltext += "好天气，CAV，OK。";
                     }
                 }
 
@@ -664,7 +670,9 @@
                     }
                     if (rawtext[i] == "NSW") {
                         console.log("NSW");
-                        Alltext += "无重要天气现象，N,S,W。";
+                        WordToOutput("NSW", [], function (dataword) {
+                            Alltext += "无重要天气现象，代码，" + dataword + "。";
+                        });
                     }
                 }
 
@@ -743,7 +751,7 @@
                     }
 
                     if (timegroup != 0 && jsontaf.fcsts[timegroup].fcstChange == "BECMG") {
-                        var finalBECMG = "预计，";
+                        var finalBECMG = "预计，BECOMING，";
                         UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeFrom, function (timestd) {
                             finalBECMG += ("在， " + timestd + "北京时");
                             console.log(finalBECMG);
@@ -808,7 +816,7 @@
                     }
 
                     if (timegroup != 0 && jsontaf.fcsts[timegroup].fcstChange == "TEMPO") {
-                        var finalTEMPO = "预计暂时性天气，";
+                        var finalTEMPO = "预计暂时性天气，代码，TEMPO 。";
                         UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeFrom, function (timestd) {
                             finalTEMPO += ("在， " + timestd + "北京时，到， ");
                             console.log(finalTEMPO);
@@ -828,7 +836,7 @@
                     }
 
                     if (timegroup != 0 && jsontaf.fcsts[timegroup].fcstChange == "FM") {
-                        var finalFM = "预计天气从，";
+                        var finalFM = "预计，FROM，天气从，";
                         UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeFrom, function (timestd) {
                             finalFM += ("" + timestd + "北京时，到， ");
                             console.log(finalFM);
@@ -847,7 +855,7 @@
                     }
 
                     if (timegroup != 0 && jsontaf.fcsts[timegroup].fcstChange == "PROB") {
-                        var finalPROB = "预计概率性天气从，";
+                        var finalPROB = "预计概率性天气，PROBOBALY，从，";
                         UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeFrom, function (timestd) {
                             finalPROB += ("" + timestd + "北京时，到， ");
                             console.log(finalPROB);
