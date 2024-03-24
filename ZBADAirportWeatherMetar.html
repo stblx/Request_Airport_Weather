@@ -551,7 +551,7 @@
             var text = 'https://www.aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&format=json';
             ajaxAPI(text, function (responseText) {
                 responseText = responseText.substring(1, responseText.length - 1);
-                if (responseText.length <= 3) {
+                if(responseText.length <= 3){
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
                     return;
                 }
