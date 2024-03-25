@@ -135,14 +135,14 @@
         };
 
         const jsonCloudstype = {
-            "CB": "雨云云状。",
-            "TCU": "浓积云云状。"
+            "CB": "雨云，云状。",
+            "TCU": "浓积云，云状。"
         };
 
         const jsonRunwayVisib = {
             "D": "有降低趋势。",
             "U": "有上升趋势。",
-            "N": "无明险趋势变化"
+            "N": "无明险趋势变化。"
         };
 
         function ajaxAPI(url, callback) {
@@ -447,6 +447,8 @@
         }
 
         function RunwayDetails(eachpart, callback) {
+            console.log("runway")
+            console.log(eachpart)
             var finalRD = "";
             for (let i = 0; i < eachpart.length; i++) {
                 if (eachpart[i].includes("R") && eachpart[i].includes("/")) {
@@ -457,11 +459,24 @@
                         finalRD += ("跑道 " + data);
                         console.log(finalRD);
                     });
+console.log(details)
                     if (details.length == 1) {
+                        if (details[0].includes("P2000")){
+                            finalRD += (" , 能见度， 大于 两 签米，");
+if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)];}
+                            
+                            console.log(finalRD);
+                    
+                            }else if (details[0].includes("N50")){
+                            finalRD += (" , 能见度， 小于 五 洞 米，");
+                            if(details[0].length == "4"){finalRD += jsonRunwayVisib[details[0].substring(3)];}
+                            console.log(finalRD);
+                    
+                            }else{
                         WordToOutput(details[0].substring(0, 4), [], function (data) {
                             finalRD += (" , 能见度， " + data + " 米， " + jsonRunwayVisib[details[0].substring(4, 5)]);
                             console.log(finalRD);
-                        });
+                        });}
                     } else {
                         WordToOutput(details[0], [], function (data) {
                             finalRD += (" , 在观测时间范围内，能见度最低， " + data + " 米");
@@ -643,6 +658,7 @@
                 });
 
                 //跑道视程
+                rawtext.push("R11/P2000N")
                 RunwayDetails(rawtext, function (data) {
                     Alltext += data;
                     console.log(Alltext);
