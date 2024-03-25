@@ -467,7 +467,7 @@ if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)]
                             
                             console.log(finalRD);
                     
-                            }else if (details[0].includes("N50")){
+                            }else if (details[0].includes("M50")){
                             finalRD += (" , 能见度， 小于 五 洞 米，");
                             if(details[0].length == "4"){finalRD += jsonRunwayVisib[details[0].substring(3)];}
                             console.log(finalRD);
@@ -658,7 +658,6 @@ if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)]
                 });
 
                 //跑道视程
-                rawtext.push("R11/P2000N")
                 RunwayDetails(rawtext, function (data) {
                     Alltext += data;
                     console.log(Alltext);
