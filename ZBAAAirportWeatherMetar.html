@@ -631,6 +631,8 @@ if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)]
 
                 console.log(arrForecast);
                 var metarfirstclouds = "-1";
+console.log("cloudstype")
+console.log(arrForecast[0])
                 for (let i = 0; i < arrForecast[0].length; i++) {
                     if (arrForecast[0][i].includes("CB")) {
                         metarfirstclouds = "CB";
@@ -721,6 +723,7 @@ if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)]
 
                 //预计
                 var finaltg = "";
+					
                 for (let tgroup = 1; tgroup < arrForecast.length; tgroup++) {
                     var arrfore = arrForecast[tgroup];
                     if (arrfore[0] == "BECMG") {
@@ -798,13 +801,20 @@ if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)]
                                 finaltg += (jsonweatherphen[arrfore[i]] + "。 ");
                             }
                         } catch { };
-                        /*
-                        try {
-                            CloudsHeight(json.clouds, "-1", function (data) {
-                                finaltg += data;
-                                console.log(finaltg);
-                            });
-                        } catch { }*/
+
+								if (jsonCloudscover[arrfore[i].substring(0,3)] == null || jsonCloudscover[arrfore[i].substring(0,3)] == undefined){}else{
+									var cover = jsonCloudscover[arrfore[i].substring(0,3)];
+									var base = arrfore[i].substring(3,6);
+									base = "" + parseInt(base) * 30;
+									if(base.length == 2){
+									base = "0"+base;
+									}
+									var type = "";
+									if(arrfore[i].length != 6){
+										type = jsonCloudstype[arrfore[i].substring(6)];
+									}
+									finaltg += (cover + base + " 米。" + type);
+								}
                     }
                     Alltext += finaltg;
                 }
