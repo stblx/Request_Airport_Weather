@@ -85,7 +85,7 @@
             "R": "右"
         };
 
-        const jsonweathercondition = {
+        const jsonweatherphen = {
             "-": "轻微的",
             "+": "重度的",
             "MI": "浅的",
@@ -96,11 +96,7 @@
             "SH": "阵性的",
             "FZ": "冰冻的",
             "VC": "机场附近的",
-            "TS": "雷暴的"
-        };
-
-        const jsonweatherphen = {
-            "TS": "雷暴",
+            "TS": "雷暴的",
             "FZ": "冰冻",
             "DZ": "毛毛雨",
             "RA": "雨",
@@ -433,12 +429,18 @@
                         finalwxs += jsonweatherphen[wxarr[i]] + "。";
                     } else if (wxarr[i].length == 3) {
                         var str = wxarr[i][1] + wxarr[i][2];
-                        finalwxs += (jsonweathercondition[wxarr[i][0]] + jsonweatherphen[str] + "。");
+                        finalwxs += (jsonweatherphen[wxarr[i][0]] + "，" + jsonweatherphen[str] + "。");
                         console.log(finalwxs);
                     } else if (wxarr[i].length == 4) {
                         var str1 = wxarr[i][0] + wxarr[i][1];
                         var str2 = wxarr[i][2] + wxarr[i][3];
-                        finalwxs += (jsonweathercondition[str1] + jsonweatherphen[str2] + "。");
+                        finalwxs += (jsonweatherphen[str1] + "，" + jsonweatherphen[str2] + "。");
+                        console.log(finalwxs);
+                    } else if (wxarr[i].length == 5) {
+                        var str1 = wxarr[i][0];
+                        var str2 = wxarr[i][1] + wxarr[i][2];
+                        var str3 = wxarr[i][3] + wxarr[i][4];
+                        finalwxs += (jsonweatherphen[str1] + "，" + jsonweatherphen[str2] + "，" + jsonweatherphen[str3] + "。");
                         console.log(finalwxs);
                     }
                 }
@@ -459,24 +461,25 @@
                         finalRD += ("跑道 " + data);
                         console.log(finalRD);
                     });
-console.log(details)
+                    console.log(details)
                     if (details.length == 1) {
-                        if (details[0].includes("P2000")){
+                        if (details[0].includes("P2000")) {
                             finalRD += (" , 能见度， 大于 两 签米，");
-if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)];}
-                            
+                            if (details[0].length == "6") { finalRD += jsonRunwayVisib[details[0].substring(5)]; }
+
                             console.log(finalRD);
-                    
-                            }else if (details[0].includes("M50")){
+
+                        } else if (details[0].includes("M50")) {
                             finalRD += (" , 能见度， 小于 五 洞 米，");
-                            if(details[0].length == "4"){finalRD += jsonRunwayVisib[details[0].substring(3)];}
+                            if (details[0].length == "4") { finalRD += jsonRunwayVisib[details[0].substring(3)]; }
                             console.log(finalRD);
-                    
-                            }else{
-                        WordToOutput(details[0].substring(0, 4), [], function (data) {
-                            finalRD += (" , 能见度， " + data + " 米， " + jsonRunwayVisib[details[0].substring(4, 5)]);
-                            console.log(finalRD);
-                        });}
+
+                        } else {
+                            WordToOutput(details[0].substring(0, 4), [], function (data) {
+                                finalRD += (" , 能见度， " + data + " 米， " + jsonRunwayVisib[details[0].substring(4, 5)]);
+                                console.log(finalRD);
+                            });
+                        }
                     } else {
                         WordToOutput(details[0], [], function (data) {
                             finalRD += (" , 在观测时间范围内，能见度最低， " + data + " 米");
@@ -631,8 +634,8 @@ if(details[0].length == "6"){finalRD += jsonRunwayVisib[details[0].substring(5)]
 
                 console.log(arrForecast);
                 var metarfirstclouds = "-1";
-console.log("cloudstype")
-console.log(arrForecast[0])
+                console.log("cloudstype")
+                console.log(arrForecast[0])
                 for (let i = 0; i < arrForecast[0].length; i++) {
                     if (arrForecast[0][i].includes("CB")) {
                         metarfirstclouds = "CB";
@@ -723,7 +726,7 @@ console.log(arrForecast[0])
 
                 //预计
                 var finaltg = "";
-					
+
                 for (let tgroup = 1; tgroup < arrForecast.length; tgroup++) {
                     var arrfore = arrForecast[tgroup];
                     if (arrfore[0] == "BECMG") {
@@ -802,19 +805,19 @@ console.log(arrForecast[0])
                             }
                         } catch { };
 
-								if (jsonCloudscover[arrfore[i].substring(0,3)] == null || jsonCloudscover[arrfore[i].substring(0,3)] == undefined){}else{
-									var cover = jsonCloudscover[arrfore[i].substring(0,3)];
-									var base = arrfore[i].substring(3,6);
-									base = "" + parseInt(base) * 30;
-									if(base.length == 2){
-									base = "0"+base;
-									}
-									var type = "";
-									if(arrfore[i].length != 6){
-										type = jsonCloudstype[arrfore[i].substring(6)];
-									}
-									finaltg += (cover + base + " 米。" + type);
-								}
+                        if (jsonCloudscover[arrfore[i].substring(0, 3)] == null || jsonCloudscover[arrfore[i].substring(0, 3)] == undefined) { } else {
+                            var cover = jsonCloudscover[arrfore[i].substring(0, 3)];
+                            var base = arrfore[i].substring(3, 6);
+                            base = "" + parseInt(base) * 30;
+                            if (base.length == 2) {
+                                base = "0" + base;
+                            }
+                            var type = "";
+                            if (arrfore[i].length != 6) {
+                                type = jsonCloudstype[arrfore[i].substring(6)];
+                            }
+                            finaltg += (cover + base + " 米。" + type);
+                        }
                     }
                     Alltext += finaltg;
                 }
