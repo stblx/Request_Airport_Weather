@@ -32,7 +32,7 @@
             "0": "洞",
             "1": "腰",
             "2": "两",
-            "3": "叁",
+            "3": "弎",
             "4": "四",
             "5": "五",
             "6": "六",
@@ -320,23 +320,8 @@
             for (let cloudsgroup = 0; cloudsgroup < clouds.length; cloudsgroup++) {
                 if (clouds[cloudsgroup]["cover"] == "CAVOK" || clouds[cloudsgroup]["cover"] == "NSC" || clouds[cloudsgroup]["cover"] == "CLR" || clouds[cloudsgroup]["cover"] == "SKC" || clouds[cloudsgroup]["cover"] == null) {
                     finalcloud += "云层无险著影响 ";
-                    if (clouds[cloudsgroup]["cover"] == "CAVOK") {
-                        finalcloud += "，CAV，OK";
-                    }
-                    if (clouds[cloudsgroup]["cover"] == "NSC") {
-                        WordToOutput(clouds[cloudsgroup]["cover"], [], function (dataword) {
-                            finalcloud += ("，代码，" + dataword);
-                        });
-                    }
-                    if (clouds[cloudsgroup]["cover"] == "CLR") {
-                        WordToOutput(clouds[cloudsgroup]["cover"], [], function (dataword) {
-                            finalcloud += ("，代码，" + dataword);
-                        });
-                    }
                     if (clouds[cloudsgroup]["cover"] == "SKC") {
-                        WordToOutput(clouds[cloudsgroup]["cover"], [], function (dataword) {
-                            finalcloud += ("，碧空，代码，" + dataword);
-                        });
+                        finalcloud += ("，碧空");
                     }
                     finalcloud += "。";
                 } else if (clouds[cloudsgroup]["base"] != "null") {
@@ -904,11 +889,7 @@
                         });
                         if (jsontaf.fcsts[timegroup].timeBec != null) {
                             UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeBec, function (timestd) {
-                                finalBECMG += ("，到， " + timestd + "北京时，开始逐渐转变天气，到， ");
-                                console.log(finalBECMG);
-                            });
-                            UNIXtoLocalTime(jsontaf.fcsts[timegroup].timeTo, function (timestd) {
-                                finalBECMG += (timestd + "北京时，结束此阶段转变。");
+                                finalBECMG += ("，到， " + timestd + "北京时，开始逐渐转变天气。 ");
                                 console.log(finalBECMG);
                             });
                         }
