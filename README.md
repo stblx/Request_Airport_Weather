@@ -58,4 +58,4 @@ Note that **is not** ATIS, the parsing method is the code written by the author 
 
 ## 快捷指令（Apple Shortcuts）
 网址（WebSite）：
-https://www.icloud.com/shortcuts/9da83b0e82174154bb07c6d81895011d
+https://www.icloud.com/shortcuts/a56927e57d2548d9acdac1d1219da9ae
