@@ -159,7 +159,7 @@
             if (ifuseajax == true) {
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
-                xhr.setRequestHeader("Access-Control-Allow-Origin","*");
+                xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
                 xhr.send();
 
                 xhr.onload = function () {
@@ -454,6 +454,8 @@
             for (let i = nowcnt; i < arrvisib.length; i++) {
                 if (/^\d{4}$/.test(arrvisib[i])) {
                     strvisib = arrvisib[i].toString();
+                } else if (arrvisib[i].includes("SM")) {
+                    strvisib = arrvisib[i].toString();
                 } else {
                     continue;
                 }
@@ -462,19 +464,36 @@
                 return;
             }
 
-            if (strvisib == "9999") {
-                finalvisib += ("能见度，大于 " + jsonReading["1"] + " " + jsonReading["0"] + " 签米。 ");
-                console.log(finalvisib);
-            } else if (strvisib == "0000" || parseInt(strvisib) < 50) {
-                finalvisib += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
-                console.log(finalvisib);
+            if (strvisib.includes("SM")) {
+                if (strvisib.includes("P6")) {
+                    finalvisib += ("能见度，大于 " + jsonReading["6"] + " 标准英里，即 大于 " + jsonReading["1"] + " " + jsonReading["0"] + " 签米。 ");
+                } else if (strvisib.includes("\\")) {
+                    finalvisib += ("能见度，在 " + jsonReading[strvisib.split("\\")[0]] + " 标准英里，到 " + jsonReading[strvisib.split("\\")[1]] + "标准英里的范围内。");
+                } else {
+                    strvisib = strvisib.split("SM")[0];
+                    if (/^\d{2}$/.test(strvisib)) {
+                        finalvisib += ("能见度，" + jsonReading[strvisib[0]] + jsonReading[strvisib[1]] + " 标准英里");
+                    } else if (/^\d{1}$/.test(strvisib)) {
+                        finalvisib += ("能见度，" + jsonReading[strvisib[0]] + " 标准英里");
+                    } else {
+                        finalvisib += ("能见度，小于" + jsonReading[strvisib[0]] + " 标准英里");
+                    }
+                }
             } else {
-                finalvisib += "能见度，";
-                WordToOutput(strvisib, [], function (data) {
-                    finalvisib += data;
-                });
-                finalvisib += " 米。 ";
-                console.log(finalvisib);
+                if (strvisib == "9999") {
+                    finalvisib += ("能见度，大于 " + jsonReading["1"] + " " + jsonReading["0"] + " 签米。 ");
+                    console.log(finalvisib);
+                } else if (strvisib == "0000" || parseInt(strvisib) < 50) {
+                    finalvisib += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
+                    console.log(finalvisib);
+                } else {
+                    finalvisib += "能见度，";
+                    WordToOutput(strvisib, [], function (data) {
+                        finalvisib += data;
+                    });
+                    finalvisib += " 米。 ";
+                    console.log(finalvisib);
+                }
             }
             callback(finalvisib);
         }
@@ -531,18 +550,29 @@
                     }
                     finalcloud += "。";
                 } else {
-                    var base = "" + parseInt(cloud.substring(3, 6)) * 30;
-                    if (base.length == 2) {
-                        base = "0" + base;
-                    }
-                    if (cloud.length <= 6) {
-                        WordToOutput(base, [], function (data) {
-                            finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " " + data + " 米。");
-                        });
+                    if (cloud.substring(3, 6) == "///") {
+                        if (cloud.length <= 6) {
+                            finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + "天空状况不明，且没有垂直能见度报告。");
+                        } else {
+                            WordToOutput(base, [], function (data) {
+                                finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + "天空状况不明，且没有垂直能见度报告， " + jsonCloudstype[cloud.substring(6)]);
+                            });
+                        }
                     } else {
-                        WordToOutput(base, [], function (data) {
-                            finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " " + data + " 米， " + jsonCloudstype[cloud.substring(6)]);
-                        });
+                        var base = "" + parseInt(cloud.substring(3, 6)) * 30;
+                        if (base.length == 2) {
+                            base = "0" + base;
+                        }
+
+                        if (cloud.length <= 6) {
+                            WordToOutput(base, [], function (data) {
+                                finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " " + data + " 米。");
+                            });
+                        } else {
+                            WordToOutput(base, [], function (data) {
+                                finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " " + data + " 米， " + jsonCloudstype[cloud.substring(6)]);
+                            });
+                        }
                     }
                 }
             }
@@ -778,8 +808,8 @@
 
                 var respTAF = "";
                 if (responseText.length > 5) {
-                    var respMETAR = responseText.split("TAF")[0];
-                    respTAF = "TAF" + responseText.split("TAF")[1];
+                    var respMETAR = "METAR " + searchtext + responseText.split(searchtext)[1].split("TAF")[0];
+                    respTAF = "TAF " + searchtext + responseText.split(searchtext)[2];
                     responseText = respMETAR;
                 }
 
@@ -949,6 +979,14 @@
                 for (let i = 2; i < arrForecast[0].length; i++) {
                     if (arrForecast[0][i].length == 5) {
                         if (arrForecast[0][i][0] == "Q") {
+                            if (/^\d{4}$/.test(arrForecast[0][i].substring(1))) {
+                                altim = arrForecast[0][i].substring(1);
+                                break;
+                            } else {
+                                continue;
+                            }
+                        }
+                        if (arrForecast[0][i][0] == "A") {
                             if (/^\d{4}$/.test(arrForecast[0][i].substring(1))) {
                                 altim = arrForecast[0][i].substring(1);
                                 break;
