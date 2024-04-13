@@ -12,6 +12,11 @@ For more information, please follow **Bilibili** **三条波浪线**
 https://space.bilibili.com/452359038
 
 ## 使用方法（Usage）
+### 直接在输入框中输入
+按照提示，可以直接输入机场的四字 **ICAO** 码，或者 **METAR** 或 **TAF** 数据。
+
+注意，一次只能输入 **一** 条数据。
+
 ### 添加网址参数 （Add Website Param）
 .\ZBAAAirportWeatherMetar.html?{0}={1}
 
