@@ -6,7 +6,7 @@
 </head>
 
 <body>
-    <form action="ZBAAWeatherRequest.html"><br>
+    <form action="ZBADWeatherRequest.html"><br>
         机场 或 METAR 或 TAF 数据：
         <input type="text" name="s" id="searchtext" value="ZBAA">
         <input type="submit" value="查询">
@@ -14,8 +14,7 @@
     <p id="ReadText"></p>
 
     <script type="text/javascript">
-        let RequestAirport = "ZBAA";
-
+        let RequestAirport = "ZBAD";
         try {
             var strhref = window.location.href;
             strhref = strhref.substring(strhref.lastIndexOf("/") + 1);
@@ -37,10 +36,8 @@
             RequestAirport = decodeURIComponent(RequestAirport);
             RequestAirport = RequestAirport.trim();
             console.log(RequestAirport);
-
-            document.getElementById('searchtext').value = RequestAirport;
         }
-
+        document.getElementById('searchtext').value = RequestAirport;
         RequestAirport = RequestAirport.toUpperCase();
 
         var Alltext = "";
@@ -162,11 +159,17 @@
             if (ifuseajax == true) {
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
-                xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-                xhr.onload = function () {
-                    callback(xhr.responseText);
-                };
                 xhr.send();
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        var response = xhr.responseText.substring(1, xhr.responseText.length - 1);
+                        console.log(response);
+                        callback(response);
+                    } else {
+                        console.error('Request failed.  Returned status of ' + xhr.status);
+                    }
+                };
             } else {
                 callback("error");
             }
@@ -750,7 +753,8 @@
             //https://aviationweather.gov/cgi-bin/data/taf.php?ids=ZBAA&format=json
 
             //METAR
-            var text = 'https://aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&taf=true';
+            //var text = 'https://aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&taf=true';
+            var text = 'https://aviation-weather.onrender.com/get_data?searchID=' + searchtext;
             var ifneedajax = true;
 
             if (searchtext.length > 4) {
@@ -772,13 +776,24 @@
                 }
 
                 var respTAF = "";
-
                 if (responseText.length > 5) {
                     var respMETAR = responseText.split("TAF")[0];
                     respTAF = "TAF" + responseText.split("TAF")[1];
                     responseText = respMETAR;
                 }
 
+                var responsetextnextlinearr = responseText.split("\\n");
+                console.log(responsetextnextlinearr);
+                responseText = "";
+                console.log(responsetextnextlinearr);
+                for (let i = 0; i < responsetextnextlinearr.length; i++) {
+                    if (responsetextnextlinearr[i] == "" || responsetextnextlinearr[i] == " " || responsetextnextlinearr[i] == null) {
+                        continue;
+                    }
+                    responseText += (responsetextnextlinearr[i].trim() + " ");
+                }
+
+                console.log(responseText);
                 console.log(respTAF);
 
                 if (responseText.split(" ")[0] != "METAR") {
@@ -789,7 +804,6 @@
                     responseText = responseText.split("AMD")[0].trim() + " " + responseText.split("AMD")[1].trim();
                 }
 
-                responseText = responseText.split("\n")[0];
                 responseText = responseText.split("=")[0];
                 responseText = responseText.trim();
                 console.log(responseText);
@@ -1058,8 +1072,9 @@
             if (searchtext.includes("AMD")) {
                 searchtext = searchtext.split("AMD")[0].trim() + " " + searchtext.split("AMD")[1].trim();
             }
-            
-            var responsetextnextlinearr = searchtext.split("\n");
+
+            var responsetextnextlinearr = searchtext.split("\\n");
+            searchtext = "";
             console.log(responsetextnextlinearr);
             for (let i = 0; i < responsetextnextlinearr.length; i++) {
                 if (responsetextnextlinearr[i] == "" || responsetextnextlinearr[i] == " " || responsetextnextlinearr[i] == null) {
