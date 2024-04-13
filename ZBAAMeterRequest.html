@@ -158,14 +158,18 @@
             "N": "无明险趋势变化。"
         };
 
-        function ajaxAPI(url, callback) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-            xhr.onload = function () {
-                callback(xhr.responseText);
-            };
-            xhr.send();
+        function ajaxAPI(url, ifuseajax, callback) {
+            if (ifuseajax == true) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+                xhr.onload = function () {
+                    callback(xhr.responseText);
+                };
+                xhr.send();
+            } else {
+                callback("error");
+            }
         }
 
         function WordToOutput(data, IndexOfInterruption = [], callback) {
@@ -747,13 +751,18 @@
 
             //METAR
             var text = 'https://aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext;
-            ajaxAPI(text, function (responseText) {
-                if (responseText.length <= 4 && searchtext.length == 4) {
+            var ifneedajax = true;
+
+            if (searchtext.length > 4) {
+                ifneedajax = false;
+            }
+            ajaxAPI(text, ifneedajax, function (responseText) {
+                if (responseText.length <= 5 && searchtext.length == 4) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
                     return;
                 }
 
-                if (responseText.length <= 4) {
+                if (responseText.length <= 5) {
                     responseText = searchtext;
                 }
 
@@ -1025,15 +1034,20 @@
             var texttaf = "https://aviationweather.gov/cgi-bin/data/taf.php?ids=" + searchtext;
             var tafall = "";
             tafall += "所选机场TAF播报。 ";
+            var ifneedajax = true;
+
+            if (searchtext.length > 4) {
+                ifneedajax = false;
+            }
 
             var arrForecast = [];
-            ajaxAPI(texttaf, function (responseTexttaf) {
-                if (responseTexttaf.includes("error retrieving data") && responseTexttaf.length == 4) {
+            ajaxAPI(texttaf, ifneedajax, function (responseTexttaf) {
+                if (responseTexttaf.includes("error") && responseTexttaf.length == 4) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
                     return;
                 }
 
-                if (responseTexttaf.includes("error retrieving data")) {
+                if (responseTexttaf.includes("error")) {
                     responseTexttaf = searchtext;
                 }
 
