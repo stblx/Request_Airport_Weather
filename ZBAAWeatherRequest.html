@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>解析机场METAR&TAF</title>
+</head>
+
+<body>
+    <form action="ZBAAMeterRequest.html"><br>
+        机场 或 METAR 或 TAF 数据：
+        <input type="text" name="s" id="searchtext" value="ZBAA">
+        <input type="submit" value="查询">
+    </form>
+    <p id="ReadText"></p>
+
+    <script type="text/javascript">
+        let RequestAirport = "ZBAA";
+
+        try {
+            var strhref = window.location.href;
+            strhref = strhref.substring(strhref.lastIndexOf("/") + 1);
+            strhref = strhref.substring(0, 4);
+            RequestAirport = strhref;
+        } catch { }
+
+        let url = window.location.search;
+        if (url != "") {
+            url = url.substring(1);
+            var datas = url.split('&');
+            RequestAirport = datas[0].split('=')[1];
+
+            var arrressplit = RequestAirport.split("+");
+            RequestAirport = "";
+            for (let i = 0; i < arrressplit.length; i++) {
+                RequestAirport += (arrressplit[i] + "%20");
+            }
+            RequestAirport = decodeURIComponent(RequestAirport);
+            RequestAirport = RequestAirport.trim();
+            console.log(RequestAirport);
+
+            document.getElementById('searchtext').value = RequestAirport;
+        }
+
+        RequestAirport = RequestAirport.toUpperCase();
+
+        var Alltext = "";
+
+        const jsonReading = {
+            "0": "洞",
+            "1": "腰",
+            "2": "两",
+            "3": "弎",
+            "4": "四",
+            "5": "五",
+            "6": "六",
+            "7": "拐",
+            "8": "八",
+            "9": "九",
+            "A": "Alpha",
+            "B": "Bravo",
+            "C": "Charlie",
+            "D": "Delta",
+            "E": "Echo",
+            "F": "Foxtrot",
+            "G": "Golf",
+            "H": "Hotel",
+            "I": "India",
+            "J": "Juliet",
+            "K": "Kilo",
+            "L": "Lima",
+            "M": "Mike",
+            "N": "November",
+            "O": "Oscar",
+            "P": "Papa",
+            "Q": "Quebec",
+            "R": "Romeo",
+            "S": "Sierra",
+            "T": "Tango",
+            "U": "Uniform",
+            "V": "Victor",
+            "W": "Whiskey",
+            "X": "X-ray",
+            "Y": "Yankee",
+            "Z": "Zulu",
+            "-": "零下",
+            "+": "洞 洞 洞"
+        };
+
+        const jsonRunwayReading = {
+            "0": "洞",
+            "1": "腰",
+            "2": "两",
+            "3": "叁",
+            "4": "四",
+            "5": "五",
+            "6": "六",
+            "7": "拐",
+            "8": "八",
+            "9": "九",
+            "L": "左",
+            "M": "中",
+            "R": "右"
+        };
+
+        const jsonweatherphen = {
+            "-": "轻微的",
+            "+": "重度的",
+            "MI": "浅的",
+            "BC": "散片状的",
+            "PR": "一部分",
+            "BL": "风吹",
+            "DR": "飘动",
+            "SH": "阵性的",
+            "FZ": "冰冻的",
+            "VC": "机场附近的",
+            "TS": "雷暴的",
+            "FZ": "冰冻",
+            "DZ": "毛毛雨",
+            "RA": "雨",
+            "SN": "雪",
+            "SG": "米雪",
+            "IC": "冰针 或 冰晶",
+            "PL": "冰粒",
+            "PE": "冰粒",
+            "GR": "冰雹",
+            "GS": "小冰雹",
+            "BR": "轻雾",
+            "FG": "雾",
+            "FU": "烟",
+            "VA": "火山灰",
+            "DU": "浮沉",
+            "SA": "扬沙",
+            "HZ": "霾",
+            "PO": "尘旋风 或 沙旋风 或 尘卷风",
+            "SQ": "飑",
+            "FC": "漏斗云 或 龙卷风",
+            "SS": "沙暴",
+            "DS": "尘暴",
+            "UP": "降水量未知",
+            "PY": "喷雾 或 海沫 或 水沫"
+        };
+
+        const jsonCloudscover = {
+            "FEW": "少云，幺到两分云，云底高，",
+            "SCT": "疏云，毵到四分云，云底高，",
+            "BKN": "多云，五到拐分云，云底高，",
+            "OVC": "阴天，八分满天云，云底高，"
+        };
+
+        const jsonCloudstype = {
+            "CB": "雨云，云状。",
+            "TCU": "浓积云，云状。"
+        };
+
+        const jsonRunwayVisib = {
+            "D": "有降低趋势。",
+            "U": "有上升趋势。",
+            "N": "无明险趋势变化。"
+        };
+
+        function ajaxAPI(url, ifuseajax, callback) {
+            if (ifuseajax == true) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+                xhr.onload = function () {
+                    callback(xhr.responseText);
+                };
+                xhr.send();
+            } else {
+                callback("error");
+            }
+        }
+
+        function WordToOutput(data, IndexOfInterruption = [], callback) {
+            var final = "";
+            for (let i = 0; i < data.length; i++) {
+                console.log(jsonReading[data[i]]);
+                final += (jsonReading[data[i]] + " ");
+
+                for (let j = 0; j < IndexOfInterruption.length; j++) {
+                    if (i == IndexOfInterruption[j]) {
+                        final += ", ";
+                    }
+                }
+            }
+            callback(final);
+        }
+
+        function RunwayToOutput(data, IndexOfInterruption = [], callback) {
+            var final = "";
+            for (let i = 0; i < data.length; i++) {
+                console.log(jsonRunwayReading[data[i]]);
+                final += (jsonRunwayReading[data[i]] + " ");
+            }
+            callback(final);
+        }
+
+        function TimeToOutputTime(data, callback) {
+            if (data.length >= 6) {
+                WordToOutput(data.substring(0, 6), [1], function (output) {
+                    console.log(output);
+                    callback(output);
+                });
+            } else if (data.length == 4 || data.length == 5) {
+                WordToOutput(data.substring(0, 4), [], function (output) {
+                    console.log(output);
+                    callback(output);
+                });
+            } else {
+                WordToOutput(data.substring(0, 2), [], function (output) {
+                    console.log(output);
+                    callback(output);
+                });
+            }
+        }
+
+        function UTCtoCST(mDay, utc, callback) {
+            var final = "";
+            if (utc.length >= 6) {
+                var day = parseInt(utc.substring(0, 2));
+                var hour = parseInt(utc.substring(2, 4)) + 8;
+                var min = utc.substring(4, 6);
+
+                if (hour >= 24) {
+                    hour = hour - 24;
+                    if (day <= 27) {
+                        day = day + 1;
+                    } else {
+                        day = 0;
+                    }
+                }
+
+                var sday = "" + day;
+                var shour = "" + hour;
+                if (sday.length == 1) {
+                    sday = "0" + sday;
+                }
+                if (shour.length == 1) {
+                    shour = "0" + shour;
+                }
+
+                if (day == 0) {
+                    final = shour + min;
+                } else {
+                    final = sday.toString() + shour.toString() + min.toString();
+                }
+            } else if (utc.length == 4 || utc.length == 5) {
+                if (mDay == "t") {
+                    var day = parseInt(utc.substring(0, 2));
+                    var hour = parseInt(utc.substring(2, 4)) + 8;
+                    var min = "00";
+                    console.log(day + " " + hour + " " + min);
+
+                    if (hour >= 24) {
+                        hour = hour - 24;
+                        if (day <= 27) {
+                            day = day + 1;
+                        } else {
+                            day = 0;
+                        }
+                    }
+
+                    var sday = "" + day;
+                    var shour = "" + hour;
+                    if (sday.length == 1) {
+                        sday = "0" + sday;
+                    }
+                    if (shour.length == 1) {
+                        shour = "0" + shour;
+                    }
+                    console.log(sday + " " + shour + " " + min);
+                    if (sday == "00") {
+                        final = shour.toString() + min.toString();
+                    } else {
+                        final = sday.toString() + shour.toString() + min.toString();
+                    }
+                } else {
+                    var day = parseInt(mDay.toString());
+                    var hour = parseInt(utc.substring(0, 2)) + 8;
+                    var min = utc.substring(2, 4);
+
+                    if (hour >= 24) {
+                        hour = hour - 24;
+                        if (day <= 27) {
+                            day = day + 1;
+                        } else {
+                            day = 0;
+                        }
+                    }
+                    var sday = "" + day;
+                    var shour = "" + hour;
+                    if (sday.length == 1) {
+                        sday = "0" + sday;
+                    }
+                    if (shour.length == 1) {
+                        shour = "0" + shour;
+                    }
+                    console.log(sday + " " + shour + " " + min);
+                    if (sday == "00") {
+                        final = shour.toString() + min.toString();
+                    } else {
+                        final = sday.toString() + shour.toString() + min.toString();
+                    }
+                }
+            } else if (utc.length == 2 || utc.length == 3) {//taf
+                var hour = parseInt(utc.substring(0, 2)) + 8;
+                var min = "00";
+                if (hour >= 24) {
+                    hour = hour - 24;
+                }
+                var shour = "" + hour;
+                if (shour.length == 1) {
+                    shour = "0" + shour;
+                }
+                console.log(shour + " " + min);
+                final = shour.toString() + min.toString();
+            }
+
+            TimeToOutputTime(final, function (data) {
+                console.log(data);
+                callback(data);
+            });
+        }
+
+        function AirportICAO(data, callback) {
+            var finalICAO = "";
+            for (let i = 0; i < data.length; i++) {
+                console.log("ICAO: " + jsonReading[data[i]]);
+                finalICAO += (jsonReading[data[i]] + " ");
+            }
+            callback(finalICAO);
+        }
+
+        function rawZuluTime(data, callback) {
+            WordToOutput(data, [1, 5], function (output) {
+                callback(output + "Time ");
+            });
+        }
+
+        function WindAll(windalltext, callback) {
+            var bo = false;
+            for (let i = 1; i < windalltext.length; i++) {
+                if (windalltext[i].includes("KT") || windalltext[i].includes("MPS") || windalltext[i].includes("KMH")) {
+                    bo = true;
+                }
+            }
+            if (bo == false) {
+                return;
+            }
+
+            var finalWind = "";
+            var arrwindAll = [];
+            for (let i = 1; i < windalltext.length; i++) {
+                if (windalltext[i].length >= 7) {
+                    if (windalltext[i].includes("KT") || windalltext[i].includes("MPS") || windalltext[i].includes("KMH")) {
+                        arrwindAll.push(windalltext[i]);
+                        console.log(arrwindAll);
+                    }
+                }
+                if (windalltext[i].length == 7 && windalltext[i].substring(3, 4) == "V") {
+                    arrwindAll.push(windalltext[i]);
+                    console.log(arrwindAll);
+                }
+            }
+            console.log(arrwindAll);
+
+            windalltext = arrwindAll;
+
+            //一般参数
+            var strwindir = windalltext[0].substring(0, 3);//风向
+            var strwindpd = windalltext[0].substring(3, 5);//风速
+            var strwindgp = "";//阵风
+            var strwindpdtype = "";//单位
+            if (windalltext[0][5] == "G") {
+                strwindgp = windalltext[0].substring(6, 8);
+                strwindpdtype = windalltext[0].substring(8);
+            } else {
+                strwindpdtype = windalltext[0].substring(5);
+            }
+            //参数 具体风向
+            var strwinddetailir1 = "";
+            var strwinddetailir2 = "";
+            if (windalltext.length == 2) {
+                if (windalltext[1][3] == "V" && windalltext[1].length == 7) {
+                    strwinddetailir1 = windalltext[1].substring(0, 3);
+                    strwinddetailir2 = windalltext[1].substring(4, 7);
+                }
+            }
+            //参数 单位
+            switch (strwindpdtype) {
+                case "MPS": strwindpdtype = " 米秒。"; break;
+                case "KT": strwindpdtype = " 节。"; break;
+                case "KMH": strwindpdtype = " 千米时。"; break;
+            }
+
+            //判断 风向 ir
+            if (strwindir == "VRB") {
+                finalWind += "风向不定。";
+            } else {
+                finalWind += "风向，";
+                if (strwindir.length == 1) {
+                    finalWind += (jsonReading["0"] + " ");
+                    finalWind += (jsonReading["0"] + " ");
+                }
+                if (strwindir.length == 2) {
+                    finalWind += (jsonReading["0"] + " ");
+                }
+                WordToOutput(strwindir, [], function (data) {
+                    finalWind += (data + "度。 ");
+                });
+            }
+
+            if (strwinddetailir1 != "" && strwinddetailir2 != "") {
+                finalWind += ("具体风向， ");
+                WordToOutput(strwinddetailir1, [], function (data) {
+                    finalWind += data;
+                    console.log(finalWind);
+                });
+                finalWind += ("度，到， ");
+                WordToOutput(strwinddetailir2, [], function (data) {
+                    finalWind += data;
+                    console.log(finalWind);
+                });
+                finalWind += ("度。");
+            }
+
+            //风速 pd
+            finalWind += "风速, ";
+            WordToOutput(strwindpd, [], function (data) {
+                finalWind += (data + strwindpdtype);
+                console.log(finalWind);
+            })
+
+            //阵风 gp
+            if (strwindgp != "") {
+                finalWind += " 阵风， ";
+                WordToOutput(strwindgp, [], function (data) {
+                    finalWind += (data + strwindpdtype);
+                    console.log(finalWind);
+                })
+            }
+            callback(finalWind);
+        }
+
+        //能见度
+        function visibdis(arrvisib, nowcnt = 2, callback) {
+            var finalvisib = "";
+            var strvisib = "";
+            for (let i = nowcnt; i < arrvisib.length; i++) {
+                if (/^\d{4}$/.test(arrvisib[i])) {
+                    strvisib = arrvisib[i].toString();
+                } else {
+                    continue;
+                }
+            }
+            if (strvisib == "") {
+                return;
+            }
+
+            if (strvisib == "9999") {
+                finalvisib += ("能见度，大于 " + jsonReading["1"] + " " + jsonReading["0"] + " 签米。 ");
+                console.log(finalvisib);
+            } else if (strvisib == "0000" || parseInt(strvisib) < 50) {
+                finalvisib += ("能见度，小于" + jsonReading["5"] + " " + jsonReading["0"] + "米。 ");
+                console.log(finalvisib);
+            } else {
+                finalvisib += "能见度，";
+                WordToOutput(strvisib, [], function (data) {
+                    finalvisib += data;
+                });
+                finalvisib += " 米。 ";
+                console.log(finalvisib);
+            }
+            callback(finalvisib);
+        }
+
+        function CloudsHeight(cloudsin, callback) {
+            var clouds = [];
+            var bo = false;
+            for (let i = 1; i < cloudsin.length; i++) {
+                if (cloudsin[i].length == 6) {
+                    if (jsonCloudscover[cloudsin[i].substring(0, 3)] != null) {
+                        bo = true;
+                        clouds.push(cloudsin[i]);
+                    }
+                }
+            }
+            if (bo == false) {
+                return;
+            }
+
+            var arrcloud = [];
+            for (let i = 0; i < clouds.length; i++) {
+                if (clouds[i].length == 6) {
+                    if (jsonCloudscover[clouds[i].substring(0, 3)] != null) {
+                        arrcloud.push(clouds[i]);
+                    }
+                } else if (clouds[i].length == 7) {
+                    if (jsonCloudscover[clouds[i].substring(0, 3)] != null) {
+                        arrcloud.push(clouds[i]);
+                    }
+                } else if (clouds[i].length == 8) {
+                    if (jsonCloudscover[clouds[i].substring(0, 3)] != null) {
+                        arrcloud.push(clouds[i]);
+                    }
+                } else if (clouds[i].length == 3) {
+                    if (cloud.substring(0, 3) == "NSC" || cloud.substring(0, 3) == "SKC") {
+                        arrcloud.push(clouds[i]);
+                    }
+                } else {
+                    continue;
+                }
+            }
+            if (arrcloud.length == 0) {
+                return;
+            }
+            console.log(arrcloud);
+
+            var finalcloud = "";
+            for (let cloudsgroup = 0; cloudsgroup < arrcloud.length; cloudsgroup++) {
+                var cloud = arrcloud[cloudsgroup];
+                if (cloud.substring(0, 3) == "NSC" || cloud.substring(0, 3) == "SKC") {
+                    finalcloud += "云层无险著影响 ";
+                    if (cloud.substring(0, 3) == "SKC") {
+                        finalcloud += ("，碧空");
+                    }
+                    finalcloud += "。";
+                } else {
+                    var base = "" + parseInt(cloud.substring(3, 6)) * 30;
+                    if (base.length == 2) {
+                        base = "0" + base;
+                    }
+                    if (cloud.length <= 6) {
+                        WordToOutput(base, [], function (data) {
+                            finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " " + data + " 米。");
+                        });
+                    } else {
+                        WordToOutput(base, [], function (data) {
+                            finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " " + data + " 米， " + jsonCloudstype[cloud.substring(6)]);
+                        });
+                    }
+                }
+            }
+            callback(finalcloud);
+        }
+
+        function WeatherPhen(arrwsin, callback) {
+            var bo = false;
+            for (let i = 1; i < arrwsin.length; i++) {
+                if (jsonweatherphen[arrwsin[i]] != null) {
+                    bo = true;
+                }
+            }
+            if (bo == false) {
+                return;
+            }
+
+
+            var arrws = [];
+            for (let i = 1; i < arrwsin.length; i++) {
+                if (arrwsin[i].length == 4) {
+                    if (jsonweatherphen[arrwsin[i].substring(0, 2)] != null) {
+                        arrws.push(arrwsin[i]);
+                    }
+                } else if (arrwsin[i].length == 5) {
+                    if (jsonweatherphen[arrwsin[i].substring(1, 3)] != null) {
+                        arrws.push(arrwsin[i]);
+                    }
+                } else if (arrwsin[i].length == 3) {
+                    if (jsonweatherphen[arrwsin[i].substring(1, 3)] != null) {
+                        arrws.push(arrwsin[i]);
+                    }
+                } else if (arrwsin[i].length == 2) {
+                    if (jsonweatherphen[arrwsin[i]] != null) {
+                        arrws.push(arrwsin[i]);
+                    }
+                } else {
+                    continue;
+                }
+            }
+
+            if (arrws.length == 0) {
+                return;
+            }
+
+            var wxString = "";
+            for (let i = 0; i < arrws.length; i++) {
+                wxString += (arrws[i] + "");
+            }
+            wxString = wxString.trim();
+
+            var finalwxs = "";
+            if (wxString != null) {
+                var wxarr = wxString.split(" ");
+                for (let i = 0; i < wxarr.length; i++) {
+                    if (wxarr[i].length == 2) {
+                        console.log(jsonweatherphen[wxarr[i]]);
+                        finalwxs += jsonweatherphen[wxarr[i]] + "。";
+                    } else if (wxarr[i].length == 3) {
+                        var str = wxarr[i][1] + wxarr[i][2];
+                        finalwxs += (jsonweatherphen[wxarr[i][0]] + "，" + jsonweatherphen[str] + "。");
+                        console.log(finalwxs);
+                    } else if (wxarr[i].length == 4) {
+                        var str1 = wxarr[i][0] + wxarr[i][1];
+                        var str2 = wxarr[i][2] + wxarr[i][3];
+                        finalwxs += (jsonweatherphen[str1] + "，" + jsonweatherphen[str2] + "。");
+                        console.log(finalwxs);
+                    } else if (wxarr[i].length == 5) {
+                        var str1 = wxarr[i][0];
+                        var str2 = wxarr[i][1] + wxarr[i][2];
+                        var str3 = wxarr[i][3] + wxarr[i][4];
+                        finalwxs += (jsonweatherphen[str1] + "，" + jsonweatherphen[str2] + "，" + jsonweatherphen[str3] + "。");
+                        console.log(finalwxs);
+                    }
+                }
+            }
+            callback(finalwxs);
+        }
+
+        function RunwayDetails(eachpart, callback) {
+            console.log("runway");
+            console.log(eachpart);
+            var finalRD = "";
+            for (let i = 0; i < eachpart.length; i++) {
+                if (eachpart[i].includes("R") && eachpart[i].includes("/")) {
+                    var runway = eachpart[i].split("/")[0].substring(1);
+                    var details = eachpart[i].split("/")[1].split("V");
+
+                    RunwayToOutput(runway, [], function (data) {
+                        finalRD += ("跑道 " + data);
+                        console.log(finalRD);
+                    });
+                    console.log(details)
+                    if (details.length == 1) {
+                        if (details[0].includes("P2000")) {
+                            finalRD += (" , 能见度， 大于 两 签米，");
+                            if (details[0].length == "6") { finalRD += jsonRunwayVisib[details[0].substring(5)]; }
+
+                            console.log(finalRD);
+
+                        } else if (details[0].includes("M50")) {
+                            finalRD += (" , 能见度， 小于 五 洞 米，");
+                            if (details[0].length == "4") { finalRD += jsonRunwayVisib[details[0].substring(3)]; }
+                            console.log(finalRD);
+
+                        } else {
+                            WordToOutput(details[0].substring(0, 4), [], function (data) {
+                                finalRD += (" , 能见度， " + data + " 米， " + jsonRunwayVisib[details[0].substring(4, 5)]);
+                                console.log(finalRD);
+                            });
+                        }
+                    } else {
+                        WordToOutput(details[0], [], function (data) {
+                            finalRD += (" , 在观测时间范围内，能见度最低， " + data + " 米");
+                            console.log(finalRD);
+                        });
+                        WordToOutput(details[1].substring(0, 4), [], function (data) {
+                            finalRD += (" , 能见度最高， " + data + " 米， " + jsonRunwayVisib[details[1].substring(4, 5)]);
+                            console.log(finalRD);
+                        });
+                    }
+                }
+            }
+            callback(finalRD);
+        }
+
+        function VerticalVisib(eachpart, callback) {
+            var finalVV = "";
+            for (let i = 0; i < eachpart.length; i++) {
+                if (eachpart[i].length > 4 && eachpart[i].includes("VV")) {
+                    var num = eachpart[i].substring(2, 5);
+                    if (num == "///") {
+                        finalVV += ("天空状况不明，且没有垂直能见度报告。");
+                        console.log(finalVV);
+                    } else {
+                        var num = "" + parseInt(num) * 30;
+                        if (num.length == 2) {
+                            num = "0" + num;
+                        }
+                        WordToOutput(num, [], function (data) {
+                            finalVV += ("垂直能见度为，" + data + "米。");
+                            console.log(finalVV);
+                        });
+                    }
+                }
+            }
+            callback(finalVV);
+        }
+
+        function WindShear(eachpart, callback) {
+            var finalWS = "";
+            for (let i = 0; i < eachpart.length; i++) {
+                if (eachpart[i] == "WS") {
+                    let j = i + 1;
+                    if (eachpart[j] == "ALL" || eachpart[j] == "All") {
+                        finalWS += ("风切变，全部跑道都存在。");
+                        break;
+                    } else {
+                        finalWS += ("存在风切变，");
+                        for (j = j; j < eachpart.length; j++) {
+                            if (eachpart[j].includes("RWY")) {
+                                RunwayToOutput(eachpart[j].substring(3), [], function (data) {
+                                    finalWS += ("在跑道 " + data + "，");
+                                });
+                            } else if (eachpart[j].includes("LDG")) {
+                                RunwayToOutput(eachpart[j + 1].substring(3), [], function (data) {
+                                    finalWS += ("在着陆跑道 " + data + "，");
+                                });
+                                j += 1;
+                            } else if (eachpart[j].includes("TKOF")) {
+                                RunwayToOutput(eachpart[j + 1].substring(3), [], function (data) {
+                                    finalWS += ("在起飞跑道 " + data + "，");
+                                });
+                                j += 1;
+                            } else { }
+                        }
+                        finalWS += ("中存在。");
+                    }
+                }
+            }
+            callback(finalWS);
+        }
+
+        function splitRawInForecast(text, callback) {
+            var finalsplit = [];
+            var finalcnt = -1;
+            for (let i = 0; i < text.length; i++) {
+                if (text[i].includes("PROB")) {
+                    finalsplit.push([]);
+                    finalcnt += 1;
+                    finalsplit[finalcnt].push(text[i]);
+                    i = i + 1;
+                    finalsplit[finalcnt].push(text[i]);
+                    continue;
+                } else if (text[i] == "BECMG" || text[i] == "TEMPO" || text[i].includes("FM") || text[i] == "TAF" || text[i] == "METAR") {
+                    finalsplit.push([]);
+                    finalcnt += 1;
+                } else { }
+                finalsplit[finalcnt].push(text[i]);
+            }
+            finalcnt += 1;
+            callback(finalsplit);
+        }
+
+        function processSearchText(searchtext, callback) {
+            //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
+            //https://aviationweather.gov/data/metar/
+            //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA&hours=0&order=id%2C-obs&sep=true&format=json
+            //https://aviationweather.gov/cgi-bin/data/taf.php?ids=ZBAA&format=json
+
+            //METAR
+            var text = 'https://aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&taf=true';
+            var ifneedajax = true;
+
+            if (searchtext.length > 4) {
+                ifneedajax = false;
+            }
+            ajaxAPI(text, ifneedajax, function (responseText) {
+                if (responseText.length <= 5 && searchtext.length == 4) {
+                    document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
+                    return;
+                }
+
+                if (responseText.length <= 5) {
+                    responseText = searchtext;
+                }
+
+                if (responseText.substring(0, 3) == "TAF") {
+                    callback("\n\n\n\n\n", searchtext);
+                    return;
+                }
+
+                var respTAF = "";
+
+                if (responseText.length > 5) {
+                    var respMETAR = responseText.split("TAF")[0];
+                    respTAF = "TAF" + responseText.split("TAF")[1];
+                    responseText = respMETAR;
+                }
+
+                console.log(respTAF);
+
+                if (responseText.split(" ")[0] != "METAR") {
+                    responseText = "METAR " + responseText;
+                }
+
+                if (responseText.includes("AMD")) {
+                    responseText = responseText.split("AMD")[0].trim() + " " + responseText.split("AMD")[1].trim();
+                }
+
+                responseText = responseText.split("\n")[0];
+                responseText = responseText.split("=")[0];
+                responseText = responseText.trim();
+                console.log(responseText);
+
+
+                var rawtext = responseText.split(" ");
+                console.log(rawtext);
+
+                var arrForecast = [];
+                splitRawInForecast(rawtext, function (arrdata) {
+                    arrForecast = arrdata;
+                    console.log(arrForecast);
+                });
+
+                //ICAO
+                AirportICAO(rawtext[1], function (data) {
+                    Alltext += "所选机场Meter播报, " + data + "。 ";
+                    console.log(Alltext);
+                });
+
+                //通报时间
+                rawZuluTime(rawtext[2], function (data) {
+                    Alltext += "通报UTC时煎, " + data + "。 ";
+                    console.log(Alltext);
+                });
+
+                //通报北京时间
+                UTCtoCST("m", rawtext[2], function (data) {
+                    Alltext += "通报北京时煎, " + data + "北京时 。 ";
+                    console.log(Alltext);
+                });
+
+                //风_所有
+                WindAll(arrForecast[0], function (data) {
+                    console.log(data);
+                    Alltext += data;
+                });
+
+                //CAVOK
+                var isCAVOK = false;
+                for (var i = 2; i < arrForecast[0].length; i++) {
+                    if (arrForecast[0][i] == "CAVOK") {
+                        console.log("CAVOK");
+                        Alltext += "CAV，OK。";
+                        isCAVOK = true;
+                        console.log(isCAVOK);
+                    }
+                }
+
+                if (isCAVOK == false) {
+                    //天气现象
+                    WeatherPhen(arrForecast[0], function (data) {
+                        Alltext += data;
+                        console.log(Alltext);
+                    });
+
+                    //云底高
+                    CloudsHeight(arrForecast[0], function (data) {
+                        Alltext += data;
+                        console.log(Alltext);
+                    });
+
+                    //能见度
+                    visibdis(arrForecast[0], 2, function (data) {
+                        Alltext += data;
+                        console.log(Alltext);
+                    });
+                }
+
+                //垂直能见度
+                VerticalVisib(arrForecast[0], function (data) {
+                    Alltext += data;
+                    console.log(Alltext);
+                });
+
+                //跑道视程
+                RunwayDetails(arrForecast[0], function (data) {
+                    Alltext += data;
+                    console.log(Alltext);
+                });
+
+                //风切变
+                WindShear(arrForecast[0], function (data) {
+                    Alltext += data;
+                    console.log(Alltext);
+                });
+
+                //温度 & 湿度
+                var finaltem = "温度，";
+                var finaldewp = "露点，";
+                var temp = 0;
+                var dewp = 0;
+
+                for (let i = 2; i < arrForecast[0].length; i++) {
+                    if (arrForecast[0][i].includes("/")) {
+                        var stemp = arrForecast[0][i].split("/")[0];
+                        var sdewp = arrForecast[0][i].split("/")[1];
+
+                        if (stemp[0] == "M" && stemp.length == 3) {
+                            if (/^\d{2}$/.test(stemp.substring(1, 3))) {
+                                temp = "-" + stemp.substring(1, 3);
+                            } else {
+                                continue;
+                            }
+                        } else if (stemp.length == 2) {
+                            if (/^\d{2}$/.test(stemp)) {
+                                temp = stemp;
+                            } else {
+                                continue;
+                            }
+                        } else { }
+
+                        if (sdewp[0] == "M" && sdewp.length == 3) {
+                            if (/^\d{2}$/.test(sdewp.substring(1, 3))) {
+                                dewp = "-" + sdewp.substring(1, 3);
+                            } else {
+                                continue;
+                            }
+                        } else if (sdewp.length == 2) {
+                            if (/^\d{2}$/.test(sdewp)) {
+                                dewp = sdewp;
+                            } else {
+                                continue;
+                            }
+                        } else { }
+                    }
+                }
+
+                for (let i = 0; i < temp.length; i++) {
+                    finaltem += (jsonReading[temp[i]] + " ");
+                };
+                Alltext += (finaltem + "度。 ");
+
+                for (let i = 0; i < dewp.length; i++) {
+                    finaldewp += (jsonReading[dewp[i]] + " ");
+                };
+                Alltext += (finaldewp + "度。 ");
+
+                //气压
+                var finalaltim = "修正海压，";
+                var altim = "";
+                for (let i = 2; i < arrForecast[0].length; i++) {
+                    if (arrForecast[0][i].length == 5) {
+                        if (arrForecast[0][i][0] == "Q") {
+                            if (/^\d{4}$/.test(arrForecast[0][i].substring(1))) {
+                                altim = arrForecast[0][i].substring(1);
+                                break;
+                            } else {
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                for (let i = 0; i < altim.length; i++) {
+                    console.log(jsonReading[altim[i]])
+                    finalaltim += (jsonReading[altim[i]] + " ");
+                };
+                Alltext += (finalaltim + "。 ");
+                console.log(Alltext);
+
+                //NOSIG
+                for (let i = 2; i < arrForecast[0].length; i++) {
+                    if (arrForecast[0][i] == "NOSIG") {
+                        console.log("NOSIG");
+                        Alltext += "天气无明险变化。";
+                    }
+                    if (arrForecast[0][i] == "NSW") {
+                        console.log("NSW");
+                        Alltext += "无重要天气现象。";
+                    }
+                }
+
+                //预计
+                var finaltg = "";
+                for (let tgroup = 1; tgroup < arrForecast.length; tgroup++) {
+                    var arrfore = arrForecast[tgroup];
+                    if (arrfore[0] == "BECMG") {
+                        finaltg += "预计， ";
+                    } else if (arrfore[0] == "TEMPO") {
+                        finaltg += "预计暂时性天气， ";
+                    } else { }
+
+                    var timehm = "";
+                    var utchm = "";
+                    var nowcnt = 2;
+                    if (arrfore[1].length == 2) {
+                        utchm += arrfore[2];
+                        nowcnt = 3;
+                    } else {
+                        utchm = arrfore[1].substring(2);
+                    }
+
+                    UTCtoCST(arrForecast[0][2].substring(0, 2), utchm, function (newtime) {
+                        timehm = newtime;
+                        console.log(timehm);
+                    });
+
+                    if (arrfore[1].includes("TL")) {
+                        finaltg += ("到，");
+                        finaltg += (timehm + " 北京时之后。");
+                        console.log(finaltg);
+                    } else if (arrfore[1].includes("FM")) {
+                        finaltg += ("自，");
+                        finaltg += (timehm + " 北京时之后。");
+                        console.log(finaltg);
+                    } else if (arrfore[1].includes("AT")) {
+                        finaltg += ("在，");
+                        finaltg += (timehm + " 北京时。");
+                        console.log(finaltg);
+                    } else { }
+
+                    for (let i = nowcnt; i < arrfore.length; i++) {
+                        if (arrfore[i] == "NSW") {
+                            console.log("NSW");
+                            finaltg += "无重要天气现象。";
+                        }
+                        if (arrfore[i] == "CAVOK") {
+                            console.log("CAVOK");
+                            finaltg += "CAV，OK。";
+                        }
+                    }
+
+                    WindAll(arrfore, function (data) {
+                        finaltg += data;
+                        console.log(finaltg);
+                    });
+
+                    visibdis(arrfore, nowcnt, function (data) {
+                        finaltg += data;
+                        console.log(finaltg);
+                    });
+
+                    WeatherPhen(arrfore, function (data) {
+                        finaltg += data;
+                        console.log(finaltg);
+                    });
+
+                    CloudsHeight(arrfore, function (data) {
+                        finaltg += data;
+                        console.log(finaltg);
+                    });
+                }
+                Alltext += finaltg;
+
+                callback("\n\n\n\n\n" + Alltext + "\n\n\n\n", respTAF);
+            });
+        }
+
+        processSearchText(RequestAirport, function (metarall, searchtext) {
+            //TAF
+            var tafall = "";
+            tafall += "所选机场TAF播报。 ";
+
+            var arrForecast = [];
+
+            if (searchtext == "TAFundefined" && metarall != "\n\n\n\n\n") {
+                document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
+                return;
+            }
+
+            if (searchtext.split(" ")[0] != "TAF") {
+                searchtext = "TAF " + searchtext;
+            }
+
+            if (searchtext.includes("AMD")) {
+                searchtext = searchtext.split("AMD")[0].trim() + " " + searchtext.split("AMD")[1].trim();
+            }
+            
+            var responsetextnextlinearr = searchtext.split("\n");
+            console.log(responsetextnextlinearr);
+            for (let i = 0; i < responsetextnextlinearr.length; i++) {
+                if (responsetextnextlinearr[i] == "" || responsetextnextlinearr[i] == " " || responsetextnextlinearr[i] == null) {
+                    continue;
+                }
+                searchtext += (responsetextnextlinearr[i].trim() + " ");
+            }
+            searchtext = searchtext.split("=")[0];
+            searchtext = searchtext.trim();
+
+            console.log(searchtext);
+            var rawtext = searchtext.split(" ");
+
+            //通报时间及有效时间
+            var taffinaltime = "";
+            rawZuluTime(rawtext[2], function (data) {
+                taffinaltime += "通报UTC时煎, " + data + "。 ";
+                console.log(taffinaltime);
+            });
+            //通报北京时间
+            UTCtoCST("m", rawtext[2], function (data) {
+                taffinaltime += "通报北京时煎, " + data + "北京时 。 ";
+                console.log(taffinaltime);
+            });
+
+            //有效时间
+            if (rawtext[3].length == 6) {
+                UTCtoCST("t", rawtext[3].substring(0, 2) + rawtext[3].substring(2, 4), function (data) {
+                    taffinaltime += "TAF 有效时煎, " + data + "北京时，到，";
+                    console.log(taffinaltime);
+                });
+                UTCtoCST("t", rawtext[3].substring(0, 2) + rawtext[3].substring(4, 6), function (data) {
+                    taffinaltime += data + "北京时。";
+                    console.log(taffinaltime);
+                });
+            } else {
+                UTCtoCST("t", rawtext[3].split("/")[0], function (data) {
+                    taffinaltime += "TAF 有效时煎, " + data + "北京时，到，";
+                    console.log(taffinaltime);
+                });
+                UTCtoCST("t", rawtext[3].split("/")[1], function (data) {
+                    taffinaltime += data + "北京时。";
+                    console.log(taffinaltime);
+                });
+            }
+            tafall += taffinaltime;
+
+            splitRawInForecast(rawtext, function (arrdata) {
+                arrForecast = arrdata;
+                console.log(arrForecast);
+            });
+
+            for (let timegroup = 0; timegroup < arrForecast.length; timegroup++) {
+                var arrfore = arrForecast[timegroup];
+                if (timegroup == 0) {
+                    //预报温度
+                    var taffinaltemp = "";
+                    var tempmax, tempmin, timemax, timemin;
+                    try {
+                        for (let i = 4; i < arrfore.length; i++) {
+                            if (arrfore[i].includes("TX")) {
+                                tempmax = arrfore[i].split("/")[0].substring(2);
+                                timemax = arrfore[i].split("/")[1];
+                                if (timemax.length == 2 || timemax.length == 3) {
+                                    timemax = rawtext[3].substring(0, 2) + timemax;
+                                }
+                                console.log("timemax" + timemax);
+                                if (tempmax.includes("M")) {
+                                    timemax = "-" + tempmax.substring(1);
+                                }
+                            }
+                            if (arrfore[i].includes("TN")) {
+                                tempmin = arrfore[i].split("/")[0].substring(2);
+                                timemin = arrfore[i].split("/")[1];
+                                if (timemin.length == 2 || timemin.length == 3) {
+                                    timemin = rawtext[3].substring(0, 2) + timemin;
+                                }
+                                if (tempmin.includes("M")) {
+                                    tempmin = "-" + tempmin.substring(1);
+                                }
+                            }
+                        }
+
+                        WordToOutput(tempmax, [], function (data) {
+                            taffinaltemp += ("预计最高温度，" + data);
+                        });
+                        UTCtoCST("t", timemax, function (timestd) {
+                            taffinaltemp += ("，度，在，" + timestd + "北京时，时达到。 ");
+                        });
+                        WordToOutput(tempmin, [], function (data) {
+                            taffinaltemp += ("预计最低温度，" + data);
+                        });
+                        UTCtoCST("t", timemin, function (timestd) {
+                            taffinaltemp += ("，度，在，" + timestd + "北京时，时达到。 ");
+                        });
+                    } catch { }
+                    tafall += taffinaltemp;
+                    console.log(tafall);
+                }
+
+                if (timegroup != 0) {
+                    var finalBECMG = "预计，";
+
+                    //概率
+                    if (arrfore[0].includes("PROB")) {
+                        WordToOutput(arrfore[0].substring(4), [], function (data) {
+                            tafall += ("气象转变概率为，" + data + " 。 ");
+                        });
+                    }
+
+                    //BECMG
+                    if (arrfore[0] == "BECMG") {
+                        if (arrfore[1].length == 4) { // 0608 : 6点-8点
+                            UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(0, 2), function (data) {
+                                finalBECMG += ("从, " + data + "北京时，到，");
+                                console.log(finalBECMG);
+                            });
+                            UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(2, 4), function (data) {
+                                finalBECMG += (data + "北京时。");
+                                console.log(finalBECMG);
+                            });
+                        } else {
+                            console.log("finalBECMG  " + finalBECMG)
+                            UTCtoCST("t", arrfore[1].split("/")[0], function (data) {
+                                finalBECMG += ("从，" + data + "北京时，到，");
+                                console.log(finalBECMG);
+                            });
+                            UTCtoCST("t", arrfore[1].split("/")[1], function (data) {
+                                finalBECMG += (data + "北京时。");
+                                console.log(finalBECMG);
+                            });
+                        }
+
+                        if (arrfore[1].includes("AT")) {
+                            if (arrfore[1] == "AT") {
+                                var hour = parseInt(arrfore[2]);
+                                hour += 8;
+                                if (hour >= 24) {
+                                    hour -= 24;
+                                }
+                                var strhour = "" + hour;
+                                if (strhour.length == 1) {
+                                    strhour = "0" + strhour;
+                                }
+                                var min = arrfore[1].substring(4, 6);
+
+                                var timehm = hour + min;
+
+                                WordToOutput(timehm, [], function (data) {
+                                    finalBECMG += ("在， " + data + " 北京时。");
+                                    console.log(finalBECMG);
+                                });
+                            } else {
+                                var hour = parseInt(arrfore[1].substring(2, 4));
+                                hour += 8;
+                                if (hour >= 24) {
+                                    hour -= 24;
+                                }
+                                var strhour = "" + hour;
+                                if (strhour.length == 1) {
+                                    strhour = "0" + strhour;
+                                }
+                                var min = arrfore[1].substring(4, 6);
+
+                                var timehm = hour + min;
+
+                                WordToOutput(timehm, [], function (data) {
+                                    finalBECMG += ("在， " + data + " 北京时。");
+                                    console.log(finalBECMG);
+                                });
+                            }
+                        }
+                        tafall += finalBECMG;
+
+                    }
+
+                    //TEMPO
+                    if (arrfore[0] == "TEMPO") {
+                        var finalTEMPO = "预计暂时性天气，";
+                        if (arrfore[1].length == 4) { // 0608 : 6点-8点
+                            UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(0, 2), function (data) {
+                                finalTEMPO += ("从, " + data + "北京时，到，");
+                                console.log(finalTEMPO);
+                            });
+                            UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(2, 4), function (data) {
+                                finalTEMPO += (data + "北京时。");
+                                console.log(finalTEMPO);
+                            });
+                        } else {
+                            UTCtoCST("t", arrfore[1].split("/")[0], function (data) {
+                                finalTEMPO += ("从，" + data + "北京时，到，");
+                                console.log(finalTEMPO);
+                            });
+                            UTCtoCST("t", arrfore[1].split("/")[1], function (data) {
+                                finalTEMPO += (data + "北京时。");
+                                console.log(finalTEMPO);
+                            });
+                        }
+                        tafall += finalTEMPO;
+                    }
+
+                    //FM
+                    if (arrfore[0].includes("FM")) {
+                        var finalFM = "预计，";
+                        UTCtoCST("m", rawtext[3].substring(0, 2) + arrfore[0].substring(2), function (data) {
+                            finalFM += ("从，" + data + "北京时开始。");
+                            console.log(finalFM);
+                        });
+                        tafall += finalFM;
+                    }
+                }
+
+                //风_所有
+                WindAll(arrfore, function (data) {
+                    console.log(data);
+                    tafall += data;
+                });
+
+                //CAVOK
+                var isCAVOK = false;
+                for (var i = 2; i < arrfore.length; i++) {
+                    if (arrfore[i] == "CAVOK") {
+                        console.log("CAVOK");
+                        tafall += "CAV，OK。";
+                        isCAVOK = true;
+                        console.log(isCAVOK);
+                    }
+                }
+
+                if (isCAVOK == false) {
+                    //天气现象
+                    WeatherPhen(arrfore, function (data) {
+                        tafall += data;
+                        console.log(tafall);
+                    });
+
+                    //云底高
+                    CloudsHeight(arrfore, function (data) {
+                        tafall += data;
+                        console.log(tafall);
+                    });
+
+                    //能见度
+                    visibdis(arrfore, 1, function (data) {
+                        tafall += data;
+                        console.log(tafall);
+                    });
+                }
+            }
+
+            //Output
+            console.log(tafall);
+            document.getElementById('ReadText').innerText = metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
+
+        });
+    </script>
+</body>
