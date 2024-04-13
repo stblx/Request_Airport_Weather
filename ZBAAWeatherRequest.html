@@ -472,11 +472,11 @@
                 } else {
                     strvisib = strvisib.split("SM")[0];
                     if (/^\d{2}$/.test(strvisib)) {
-                        finalvisib += ("能见度，" + jsonReading[strvisib[0]] + jsonReading[strvisib[1]] + " 标准英里");
+                        finalvisib += ("能见度，" + jsonReading[strvisib[0]] + jsonReading[strvisib[1]] + " 标准英里。");
                     } else if (/^\d{1}$/.test(strvisib)) {
-                        finalvisib += ("能见度，" + jsonReading[strvisib[0]] + " 标准英里");
+                        finalvisib += ("能见度，" + jsonReading[strvisib[0]] + " 标准英里。");
                     } else {
-                        finalvisib += ("能见度，小于" + jsonReading[strvisib[0]] + " 标准英里");
+                        finalvisib += ("能见度，小于" + jsonReading[strvisib[0]] + " 标准英里。");
                     }
                 }
             } else {
@@ -543,9 +543,9 @@
             var finalcloud = "";
             for (let cloudsgroup = 0; cloudsgroup < arrcloud.length; cloudsgroup++) {
                 var cloud = arrcloud[cloudsgroup];
-                if (cloud.substring(0, 3) == "NSC" || cloud.substring(0, 3) == "SKC") {
+                if (cloud == "NSC" || cloud == "SKC") {
                     finalcloud += "云层无险著影响 ";
-                    if (cloud.substring(0, 3) == "SKC") {
+                    if (cloud == "SKC") {
                         finalcloud += ("，碧空");
                     }
                     finalcloud += "。";
@@ -580,17 +580,6 @@
         }
 
         function WeatherPhen(arrwsin, callback) {
-            var bo = false;
-            for (let i = 1; i < arrwsin.length; i++) {
-                if (jsonweatherphen[arrwsin[i]] != null) {
-                    bo = true;
-                }
-            }
-            if (bo == false) {
-                return;
-            }
-
-
             var arrws = [];
             for (let i = 1; i < arrwsin.length; i++) {
                 if (arrwsin[i].length == 4) {
