@@ -1037,7 +1037,7 @@
                     responseTexttaf = searchtext;
                 }
 
-                if (responseTexttaf.substring(0, 5) == "METAR") {
+                if (responseTexttaf.substring(0, 5) == "METAR" || metarall != "\n\n\n\n\n") {
                     document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
                     return;
                 }
