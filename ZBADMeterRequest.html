@@ -6,21 +6,39 @@
 </head>
 
 <body>
+    <form action="ZBAAMeterRequest.html"><br>
+        机场 或 METAR 或 TAF 数据：
+        <input type="text" name="s" id="searchtext" value="ZBAA">
+        <input type="submit" value="查询">
+    </form>
     <p id="ReadText"></p>
 
     <script type="text/javascript">
         let RequestAirport = "ZBAA";
 
-        var strhref = window.location.href;
-        strhref = strhref.substring(strhref.lastIndexOf("/") + 1);
-        strhref = strhref.substring(0, 4);
-        RequestAirport = strhref;
+        try {
+            var strhref = window.location.href;
+            strhref = strhref.substring(strhref.lastIndexOf("/") + 1);
+            strhref = strhref.substring(0, 4);
+            RequestAirport = strhref;
+        } catch { }
 
         let url = window.location.search;
         if (url != "") {
             url = url.substring(1);
             var datas = url.split('&');
             RequestAirport = datas[0].split('=')[1];
+
+            var arrressplit = RequestAirport.split("+");
+            RequestAirport = "";
+            for (let i = 0; i < arrressplit.length; i++) {
+                RequestAirport += (arrressplit[i] + "%20");
+            }
+            RequestAirport = decodeURIComponent(RequestAirport);
+            RequestAirport = RequestAirport.trim();
+            console.log(RequestAirport);
+
+            document.getElementById('searchtext').value = RequestAirport;
         }
 
         RequestAirport = RequestAirport.toUpperCase();
@@ -328,9 +346,8 @@
             }
 
             var finalWind = "";
-
             var arrwindAll = [];
-            for (let i = 2; i < windalltext.length; i++) {
+            for (let i = 1; i < windalltext.length; i++) {
                 if (windalltext[i].length >= 7) {
                     if (windalltext[i].includes("KT") || windalltext[i].includes("MPS") || windalltext[i].includes("KMH")) {
                         arrwindAll.push(windalltext[i]);
@@ -537,7 +554,7 @@
 
 
             var arrws = [];
-            for (let i = 2; i < arrwsin.length; i++) {
+            for (let i = 1; i < arrwsin.length; i++) {
                 if (arrwsin[i].length == 4) {
                     if (jsonweatherphen[arrwsin[i].substring(0, 2)] != null) {
                         arrws.push(arrwsin[i]);
@@ -731,13 +748,28 @@
             //METAR
             var text = 'https://aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext;
             ajaxAPI(text, function (responseText) {
-                if (responseText.length <= 4) {
+                if (responseText.length <= 4 && searchtext.length == 4) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
                     return;
                 }
+
+                if (responseText.length <= 4) {
+                    responseText = searchtext;
+                }
+
+                if (responseText.substring(0, 3) == "TAF") {
+                    callback("\n\n\n\n\n", searchtext);
+                    return;
+                }
+
                 if (responseText.split(" ")[0] != "METAR") {
                     responseText = "METAR " + responseText;
                 }
+
+                if (responseText.includes("AMD")) {
+                    responseText = responseText.split("AMD")[0].trim() + " " + responseText.split("AMD")[1].trim();
+                }
+
                 responseText = responseText.split("\n")[0];
                 responseText = responseText.split("=")[0];
                 responseText = responseText.trim();
@@ -984,7 +1016,7 @@
                 }
                 Alltext += finaltg;
 
-                callback("\n\n\n\n\n\n\n\n" + Alltext + "\n\n\n\n", searchtext);
+                callback("\n\n\n\n\n" + Alltext + "\n\n\n\n", searchtext);
             });
         }
 
@@ -996,18 +1028,32 @@
 
             var arrForecast = [];
             ajaxAPI(texttaf, function (responseTexttaf) {
-                if (responseTexttaf.length <= 4) {
+                if (responseTexttaf.includes("error retrieving data") && responseTexttaf.length == 4) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
                     return;
                 }
+
+                if (responseTexttaf.includes("error retrieving data")) {
+                    responseTexttaf = searchtext;
+                }
+
+                if (responseTexttaf.substring(0, 5) == "METAR") {
+                    document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
+                    return;
+                }
+
                 if (responseTexttaf.split(" ")[0] != "TAF") {
                     responseTexttaf = "TAF " + responseTexttaf;
+                }
+
+                if (responseTexttaf.includes("AMD")) {
+                    responseTexttaf = responseTexttaf.split("AMD")[0].trim() + " " + responseTexttaf.split("AMD")[1].trim();
                 }
 
                 var responsetextnextlinearr = responseTexttaf.split("\n");
                 responseTexttaf = "";
                 for (let i = 0; i < responsetextnextlinearr.length; i++) {
-                    if(responsetextnextlinearr[i] == "" || responsetextnextlinearr[i] == " " || responsetextnextlinearr[i] == null){
+                    if (responsetextnextlinearr[i] == "" || responsetextnextlinearr[i] == " " || responsetextnextlinearr[i] == null) {
                         continue;
                     }
                     responseTexttaf += (responsetextnextlinearr[i].trim() + " ");
@@ -1178,7 +1224,7 @@
                                 }
                             }
                             tafall += finalBECMG;
-                            
+
                         }
 
                         //TEMPO
@@ -1209,7 +1255,7 @@
                         //FM
                         if (arrfore[0].includes("FM")) {
                             var finalFM = "预计，";
-                            UTCtoCST("m", arrfore[0].substring(2), function (data) {
+                            UTCtoCST("m", rawtext[3].substring(0, 2) + arrfore[0].substring(2), function (data) {
                                 finalFM += ("从，" + data + "北京时开始。");
                                 console.log(finalFM);
                             });
@@ -1248,7 +1294,7 @@
                         });
 
                         //能见度
-                        visibdis(arrfore, 2, function (data) {
+                        visibdis(arrfore, 1, function (data) {
                             tafall += data;
                             console.log(tafall);
                         });
