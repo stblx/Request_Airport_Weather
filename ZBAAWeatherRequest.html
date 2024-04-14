@@ -164,7 +164,7 @@
 
                 xhr.onload = function () {
                     if (xhr.status == 200) {
-                        var response = xhr.responseText.substring(1, xhr.responseText.length - 1);
+                        var response = xhr.responseText;
                         console.log(response);
                         callback(response);
                     } else {
@@ -774,44 +774,54 @@
 
             //METAR
             //var text = 'https://aviationweather.gov/cgi-bin/data/metar.php?ids=' + searchtext + '&taf=true';
-            var text = 'https://aviation-weather.onrender.com/get_data?searchID=' + searchtext;
+            var text = 'https://renderwebservice-ofu4.onrender.com/aviationweather/' + searchtext;
             var ifneedajax = true;
 
             if (searchtext.length > 4) {
                 ifneedajax = false;
             }
             ajaxAPI(text, ifneedajax, function (responseText) {
-                if (responseText.length <= 5 && searchtext.length == 4) {
+                if (responseText == "err" && ifneedajax == true) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
                     return;
                 }
 
-                if (responseText.length <= 5) {
+                if (ifneedajax == false) {
                     responseText = searchtext;
+                    if (responseText.split(" ")[0] == "TAF" || responseText.split(" ")[0] == "METAR") {
+                        searchtext = responseText.split(" ")[1];
+                    } else {
+                        searchtext = responseText.split(" ")[0];
+                    }
                 }
 
-                if (responseText.substring(0, 3) == "TAF") {
-                    callback("\n\n\n\n\n", searchtext);
-                    return;
+                if (ifneedajax == false) {
+                    if (responseText.substring(0, 3) == "TAF") {
+                        callback("\n\n\n\n\n", responseText);
+                        return;
+                    }
+                    if (responseText.split(" ")[0] != "METAR" && responseText.split(" ")[2].includes("MPS") == false && responseText.split(" ")[2].includes("KT") == false && responseText.split(" ")[2].includes("KMH") == false) {
+                        callback("\n\n\n\n\n", responseText);
+                        return;
+                    }
                 }
 
                 var respTAF = "";
-                if (responseText.length > 5) {
-                    var respMETAR = "METAR " + searchtext + responseText.split(searchtext)[1].split("TAF")[0];
-                    respTAF = "TAF " + searchtext + responseText.split(searchtext)[2];
-                    responseText = respMETAR;
+                var respMETAR = ("METAR " + searchtext + responseText.split(searchtext)[1].split("TAF")[0]).trim();
+                if (responseText.split(searchtext).length == 3) {
+                    respTAF = ("TAF " + searchtext + responseText.split(searchtext)[2]).trim();
                 }
+                responseText = respMETAR;
 
-                var responsetextnextlinearr = responseText.split("\\n");
-                console.log(responsetextnextlinearr);
-                responseText = "";
-                console.log(responsetextnextlinearr);
-                for (let i = 0; i < responsetextnextlinearr.length; i++) {
-                    if (responsetextnextlinearr[i] == "" || responsetextnextlinearr[i] == " " || responsetextnextlinearr[i] == null) {
+                var arrnewlinerespTAF = respTAF.split("\n");
+                respTAF = "";
+                for (let i = 0; i < arrnewlinerespTAF.length; i++) {
+                    if (arrnewlinerespTAF[i] == "" || arrnewlinerespTAF[i] == " " || arrnewlinerespTAF[i] == null) {
                         continue;
                     }
-                    responseText += (responsetextnextlinearr[i].trim() + " ");
+                    respTAF += (arrnewlinerespTAF[i].trim() + " ");
                 }
+                respTAF = respTAF.trim();
 
                 console.log(responseText);
                 console.log(respTAF);
@@ -827,7 +837,6 @@
                 responseText = responseText.split("=")[0];
                 responseText = responseText.trim();
                 console.log(responseText);
-
 
                 var rawtext = responseText.split(" ");
                 console.log(rawtext);
@@ -1077,18 +1086,17 @@
                 }
                 Alltext += finaltg;
 
-                callback("\n\n\n\n\n" + Alltext + "\n\n\n\n", respTAF);
+                callback("\n\n\n\n\n" + Alltext + "\n\n\n\n", respTAF, searchtext);
             });
         }
 
-        processSearchText(RequestAirport, function (metarall, searchtext) {
+        processSearchText(RequestAirport, function (metarall, searchtext, respTAF) {
             //TAF
             var tafall = "";
             tafall += "所选机场TAF播报。 ";
 
             var arrForecast = [];
-
-            if (searchtext == "TAFundefined" && metarall != "\n\n\n\n\n") {
+            if (searchtext == "" && metarall != "\n\n\n\n\n") {
                 document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
                 return;
             }
