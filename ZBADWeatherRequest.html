@@ -1204,35 +1204,40 @@
                 }
 
                 if (timegroup != 0) {
-                    var finalBECMG = "预计，";
+                    var finalFore = "预计，";
 
                     //概率
                     if (arrfore[0].includes("PROB")) {
                         WordToOutput(arrfore[0].substring(4), [], function (data) {
-                            tafall += ("气象转变概率为，" + data + " 。 ");
+                            finalFore += ("气象转变概率为，" + data + " ， ");
                         });
+                        var arrforewithoutPROB = [];
+                        for (let i = 1; i < arrfore.length; i++) {
+                            arrforewithoutPROB.push(arrfore[i]);
+                        }
+                        arrfore = arrforewithoutPROB;
                     }
 
                     //BECMG
                     if (arrfore[0] == "BECMG") {
                         if (arrfore[1].length == 4) { // 0608 : 6点-8点
                             UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(0, 2), function (data) {
-                                finalBECMG += ("从, " + data + "北京时，到，");
-                                console.log(finalBECMG);
+                                finalFore += ("从, " + data + "北京时，到，");
+                                console.log(finalFore);
                             });
                             UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(2, 4), function (data) {
-                                finalBECMG += (data + "北京时。");
-                                console.log(finalBECMG);
+                                finalFore += (data + "北京时。");
+                                console.log(finalFore);
                             });
                         } else {
-                            console.log("finalBECMG  " + finalBECMG)
+                            console.log("finalFore  " + finalFore)
                             UTCtoCST("t", arrfore[1].split("/")[0], function (data) {
-                                finalBECMG += ("从，" + data + "北京时，到，");
-                                console.log(finalBECMG);
+                                finalFore += ("从，" + data + "北京时，到，");
+                                console.log(finalFore);
                             });
                             UTCtoCST("t", arrfore[1].split("/")[1], function (data) {
-                                finalBECMG += (data + "北京时。");
-                                console.log(finalBECMG);
+                                finalFore += (data + "北京时。");
+                                console.log(finalFore);
                             });
                         }
 
@@ -1252,8 +1257,8 @@
                                 var timehm = hour + min;
 
                                 WordToOutput(timehm, [], function (data) {
-                                    finalBECMG += ("在， " + data + " 北京时。");
-                                    console.log(finalBECMG);
+                                    finalFore += ("在， " + data + " 北京时。");
+                                    console.log(finalFore);
                                 });
                             } else {
                                 var hour = parseInt(arrfore[1].substring(2, 4));
@@ -1270,48 +1275,47 @@
                                 var timehm = hour + min;
 
                                 WordToOutput(timehm, [], function (data) {
-                                    finalBECMG += ("在， " + data + " 北京时。");
-                                    console.log(finalBECMG);
+                                    finalFore += ("在， " + data + " 北京时。");
+                                    console.log(finalFore);
                                 });
                             }
                         }
-                        tafall += finalBECMG;
+                        tafall += finalFore;
 
                     }
 
                     //TEMPO
                     if (arrfore[0] == "TEMPO") {
-                        var finalTEMPO = "预计暂时性天气，";
+                        finalFore += "暂时性天气，";
                         if (arrfore[1].length == 4) { // 0608 : 6点-8点
                             UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(0, 2), function (data) {
-                                finalTEMPO += ("从, " + data + "北京时，到，");
-                                console.log(finalTEMPO);
+                                finalFore += ("从, " + data + "北京时，到，");
+                                console.log(finalFore);
                             });
                             UTCtoCST("t", rawtext[3].substring(0, 2) + arrfore[1].substring(2, 4), function (data) {
-                                finalTEMPO += (data + "北京时。");
-                                console.log(finalTEMPO);
+                                finalFore += (data + "北京时。");
+                                console.log(finalFore);
                             });
                         } else {
                             UTCtoCST("t", arrfore[1].split("/")[0], function (data) {
-                                finalTEMPO += ("从，" + data + "北京时，到，");
-                                console.log(finalTEMPO);
+                                finalFore += ("从，" + data + "北京时，到，");
+                                console.log(finalFore);
                             });
                             UTCtoCST("t", arrfore[1].split("/")[1], function (data) {
-                                finalTEMPO += (data + "北京时。");
-                                console.log(finalTEMPO);
+                                finalFore += (data + "北京时。");
+                                console.log(finalFore);
                             });
                         }
-                        tafall += finalTEMPO;
+                        tafall += finalFore;
                     }
 
                     //FM
                     if (arrfore[0].includes("FM")) {
-                        var finalFM = "预计，";
                         UTCtoCST("m", rawtext[3].substring(0, 2) + arrfore[0].substring(2), function (data) {
-                            finalFM += ("从，" + data + "北京时开始。");
-                            console.log(finalFM);
+                            finalFore += ("从，" + data + "北京时开始。");
+                            console.log(finalFore);
                         });
-                        tafall += finalFM;
+                        tafall += finalFore;
                     }
                 }
 
