@@ -499,37 +499,15 @@
         }
 
         function CloudsHeight(cloudsin, callback) {
-            var clouds = [];
-            var bo = false;
-            for (let i = 1; i < cloudsin.length; i++) {
-                if (cloudsin[i].length == 6) {
-                    if (jsonCloudscover[cloudsin[i].substring(0, 3)] != null) {
-                        bo = true;
-                        clouds.push(cloudsin[i]);
-                    }
-                }
-            }
-            if (bo == false) {
-                return;
-            }
-
             var arrcloud = [];
-            for (let i = 0; i < clouds.length; i++) {
-                if (clouds[i].length == 6) {
-                    if (jsonCloudscover[clouds[i].substring(0, 3)] != null) {
-                        arrcloud.push(clouds[i]);
+            for (let i = 0; i < cloudsin.length; i++) {
+                if (cloudsin[i].length == 6 || cloudsin[i].length == 7 || cloudsin[i].length == 8) {
+                    if (jsonCloudscover[cloudsin[i].substring(0, 3)] != null) {
+                        arrcloud.push(cloudsin[i]);
                     }
-                } else if (clouds[i].length == 7) {
-                    if (jsonCloudscover[clouds[i].substring(0, 3)] != null) {
-                        arrcloud.push(clouds[i]);
-                    }
-                } else if (clouds[i].length == 8) {
-                    if (jsonCloudscover[clouds[i].substring(0, 3)] != null) {
-                        arrcloud.push(clouds[i]);
-                    }
-                } else if (clouds[i].length == 3) {
-                    if (cloud.substring(0, 3) == "NSC" || cloud.substring(0, 3) == "SKC") {
-                        arrcloud.push(clouds[i]);
+                } else if (cloudsin[i].length == 3) {
+                    if (cloudsin[i].substring(0, 3) == "NSC" || cloudsin[i].substring(0, 3) == "SKC") {
+                        arrcloud.push(cloudsin[i]);
                     }
                 } else {
                     continue;
@@ -582,12 +560,13 @@
         function WeatherPhen(arrwsin, callback) {
             var arrws = [];
             for (let i = 1; i < arrwsin.length; i++) {
-                if (arrwsin[i].length == 4) {
-                    if (jsonweatherphen[arrwsin[i].substring(0, 2)] != null) {
-                        arrws.push(arrwsin[i]);
-                    }
-                } else if (arrwsin[i].length == 5) {
+                if (arrwsin[i].length == 5) {
                     if (jsonweatherphen[arrwsin[i].substring(1, 3)] != null) {
+                        arrws.push(arrwsin[i]);
+
+                    }
+                } else if (arrwsin[i].length == 4) {
+                    if (jsonweatherphen[arrwsin[i].substring(0, 2)] != null) {
                         arrws.push(arrwsin[i]);
                     }
                 } else if (arrwsin[i].length == 3) {
@@ -609,7 +588,7 @@
 
             var wxString = "";
             for (let i = 0; i < arrws.length; i++) {
-                wxString += (arrws[i] + "");
+                wxString += (arrws[i] + " ");
             }
             wxString = wxString.trim();
 
