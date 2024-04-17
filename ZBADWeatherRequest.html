@@ -415,36 +415,36 @@
                 WordToOutput(strwindir, [], function (data) {
                     finalWind += (data + "度。 ");
                 });
-            }
 
-            if (strwinddetailir1 != "" && strwinddetailir2 != "") {
-                finalWind += ("具体风向， ");
-                WordToOutput(strwinddetailir1, [], function (data) {
-                    finalWind += data;
-                    console.log(finalWind);
-                });
-                finalWind += ("度，到， ");
-                WordToOutput(strwinddetailir2, [], function (data) {
-                    finalWind += data;
-                    console.log(finalWind);
-                });
-                finalWind += ("度。");
-            }
+                if (strwinddetailir1 != "" && strwinddetailir2 != "") {
+                    finalWind += ("具体风向， ");
+                    WordToOutput(strwinddetailir1, [], function (data) {
+                        finalWind += data;
+                        console.log(finalWind);
+                    });
+                    finalWind += ("度，到， ");
+                    WordToOutput(strwinddetailir2, [], function (data) {
+                        finalWind += data;
+                        console.log(finalWind);
+                    });
+                    finalWind += ("度。");
+                }
 
-            //风速 pd
-            finalWind += "风速, ";
-            WordToOutput(strwindpd, [], function (data) {
-                finalWind += (data + strwindpdtype);
-                console.log(finalWind);
-            });
-
-            //阵风 gp
-            if (strwindgp != "") {
-                finalWind += " 阵风， ";
-                WordToOutput(strwindgp, [], function (data) {
+                //风速 pd
+                finalWind += "风速, ";
+                WordToOutput(strwindpd, [], function (data) {
                     finalWind += (data + strwindpdtype);
                     console.log(finalWind);
-                })
+                });
+
+                //阵风 gp
+                if (strwindgp != "") {
+                    finalWind += " 阵风， ";
+                    WordToOutput(strwindgp, [], function (data) {
+                        finalWind += (data + strwindpdtype);
+                        console.log(finalWind);
+                    });
+                }
             }
             callback(finalWind);
         }
