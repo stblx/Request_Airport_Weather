@@ -401,6 +401,8 @@
             //判断 风向 ir
             if (strwindir == "VRB") {
                 finalWind += "风向不定。";
+            } else if (strwindpd == "00") {
+                finalWind += ("地面静风。");
             } else {
                 finalWind += "风向，";
                 if (strwindir.length == 1) {
@@ -434,7 +436,7 @@
             WordToOutput(strwindpd, [], function (data) {
                 finalWind += (data + strwindpdtype);
                 console.log(finalWind);
-            })
+            });
 
             //阵风 gp
             if (strwindgp != "") {
