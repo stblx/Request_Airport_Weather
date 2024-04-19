@@ -796,6 +796,10 @@
             }
         }
 
+        function EndAppToReadAuto(readtext) {
+            ReadingText(1, readtext);
+        }
+
         function processSearchText(searchtext, callback) {
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
             //https://aviationweather.gov/data/metar/
@@ -813,8 +817,7 @@
             ajaxAPI(text, ifneedajax, function (responseText) {
                 if (responseText == "err" && ifneedajax == true) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
-                    var button = document.getElementById('btnRead1');
-                    button.click();
+                    EndAppToReadAuto("\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！");
                     return;
                 }
 
@@ -1130,8 +1133,7 @@
             var arrForecast = [];
             if (searchtext == "" && metarall != "\n\n\n\n\n") {
                 document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
-                var button = document.getElementById('btnRead1');
-                button.click();
+                EndAppToReadAuto(metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。");
                 return;
             }
 
@@ -1402,8 +1404,7 @@
             //Output
             console.log(tafall);
             document.getElementById('ReadText').innerText = metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
-            var button = document.getElementById('btnRead1');
-            button.click();
+            EndAppToReadAuto(metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。");
         });
     </script>
 </body>
