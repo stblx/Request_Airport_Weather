@@ -760,8 +760,10 @@
             let speech;
             if (document.getElementById('ReadText').innerText == "") {
                 speech = new SpeechSynthesisUtterance(value);
+                console.log("none " + statue + " " + value);
             } else {
                 speech = new SpeechSynthesisUtterance(document.getElementById('ReadText').innerText);
+                console.log("have " + statue + " " + document.getElementById('ReadText').innerText);
             }
 
             if (statue == 1) {
@@ -798,7 +800,7 @@
                 if (responseText == "err" && ifneedajax == true) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
 
-                    ReadingText(1, "");
+                    ReadingText(1, "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！");
                     return;
                 }
 
@@ -1114,7 +1116,7 @@
             var arrForecast = [];
             if (searchtext == "" && metarall != "\n\n\n\n\n") {
                 document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
-                ReadingText(1, "");
+                ReadingText(1, metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。");
                 return;
             }
 
@@ -1385,7 +1387,7 @@
             //Output
             console.log(tafall);
             document.getElementById('ReadText').innerText = metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
-            ReadingText(1, "");
+            ReadingText(1, metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。");
         });
     </script>
 </body>

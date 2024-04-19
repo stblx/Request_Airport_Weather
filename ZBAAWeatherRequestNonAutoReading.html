@@ -760,8 +760,10 @@
             let speech;
             if (document.getElementById('ReadText').innerText == "") {
                 speech = new SpeechSynthesisUtterance(value);
+                console.log("none " + statue + " " + value);
             } else {
                 speech = new SpeechSynthesisUtterance(document.getElementById('ReadText').innerText);
+                console.log("have " + statue + " " + document.getElementById('ReadText').innerText);
             }
 
             if (statue == 1) {

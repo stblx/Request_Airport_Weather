@@ -8,7 +8,7 @@
 <body>
     <form action="ZBADWeatherRequestNonAutoReading.html"><br>
         机场 或 METAR 或 TAF 数据：
-        <input type="text" name="s" id="searchtext" value="ZBAA">
+        <input type="text" name="s" id="searchtext" value="ZBAD">
         <input type="submit" value="查询">
     </form>
     <br>
@@ -23,7 +23,7 @@
     <p id="ReadText"></p>
 
     <script type="text/javascript">
-        let RequestAirport = "ZBAA";
+        let RequestAirport = "ZBAD";
         try {
             var strhref = window.location.href;
             strhref = strhref.substring(strhref.lastIndexOf("/") + 1);
@@ -760,8 +760,10 @@
             let speech;
             if (document.getElementById('ReadText').innerText == "") {
                 speech = new SpeechSynthesisUtterance(value);
+                console.log("none " + statue + " " + value);
             } else {
                 speech = new SpeechSynthesisUtterance(document.getElementById('ReadText').innerText);
+                console.log("have " + statue + " " + document.getElementById('ReadText').innerText);
             }
 
             if (statue == 1) {
