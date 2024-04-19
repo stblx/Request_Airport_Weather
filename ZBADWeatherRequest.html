@@ -11,6 +11,15 @@
         <input type="text" name="s" id="searchtext" value="ZBAA">
         <input type="submit" value="查询">
     </form>
+    <br>
+    <button onclick='ReadingText(1,"数据正在获取解析中，请稍等。")'>朗读</button>
+    <strong> </strong>
+    <button onclick='ReadingText(2,"数据正在获取解析中，请稍等。")'>停止</button>
+    <strong> </strong>
+    <button onclick='ReadingText(3,"数据正在获取解析中，请稍等。")'>暂停</button>
+    <strong> </strong>
+    <button onclick='ReadingText(4,"数据正在获取解析中，请稍等。")'>继续</button>
+    <br>
     <p id="ReadText"></p>
 
     <script type="text/javascript">
@@ -413,7 +422,7 @@
                     finalWind += (jsonReading["0"] + " ");
                 }
                 WordToOutput(strwindir, [], function (data) {
-                    finalWind += (data + "度。 ");
+                    finalWind += (data + " 度。 ");
                 });
 
                 if (strwinddetailir1 != "" && strwinddetailir2 != "") {
@@ -422,12 +431,12 @@
                         finalWind += data;
                         console.log(finalWind);
                     });
-                    finalWind += ("度，到， ");
+                    finalWind += (" 度，到， ");
                     WordToOutput(strwinddetailir2, [], function (data) {
                         finalWind += data;
                         console.log(finalWind);
                     });
-                    finalWind += ("度。");
+                    finalWind += (" 度。");
                 }
 
                 //风速 pd
@@ -470,7 +479,7 @@
                 if (strvisib.includes("P6")) {
                     finalvisib += ("能见度，大于 " + jsonReading["6"] + " 标准英里，即 大于 " + jsonReading["1"] + " " + jsonReading["0"] + " 签米。 ");
                 } else if (strvisib.includes("\\")) {
-                    finalvisib += ("能见度，在 " + jsonReading[strvisib.split("\\")[0]] + " 标准英里，到 " + jsonReading[strvisib.split("\\")[1]] + "标准英里的范围内。");
+                    finalvisib += ("能见度，在 " + jsonReading[strvisib.split("\\")[0]] + " 标准英里，到 " + jsonReading[strvisib.split("\\")[1]] + " 标准英里的范围内。");
                 } else {
                     strvisib = strvisib.split("SM")[0];
                     if (/^\d{2}$/.test(strvisib)) {
@@ -526,16 +535,16 @@
                 if (cloud == "NSC" || cloud == "SKC") {
                     finalcloud += "云层无险著影响 ";
                     if (cloud == "SKC") {
-                        finalcloud += ("，碧空");
+                        finalcloud += ("，碧空 ");
                     }
                     finalcloud += "。";
                 } else {
                     if (cloud.substring(3, 6) == "///") {
                         if (cloud.length <= 6) {
-                            finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + "天空状况不明，且没有垂直能见度报告。");
+                            finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " 天空状况不明，且没有垂直能见度报告。");
                         } else {
                             WordToOutput(base, [], function (data) {
-                                finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + "天空状况不明，且没有垂直能见度报告， " + jsonCloudstype[cloud.substring(6)]);
+                                finalcloud += (jsonCloudscover[cloud.substring(0, 3)] + " 天空状况不明，且没有垂直能见度报告， " + jsonCloudstype[cloud.substring(6)]);
                             });
                         }
                     } else {
@@ -656,7 +665,7 @@
                         }
                     } else {
                         WordToOutput(details[0], [], function (data) {
-                            finalRD += (" , 在观测时间范围内，能见度最低， " + data + " 米");
+                            finalRD += (" ， 在观测时间范围内，能见度最低， " + data + " 米");
                             console.log(finalRD);
                         });
                         WordToOutput(details[1].substring(0, 4), [], function (data) {
@@ -675,7 +684,7 @@
                 if (eachpart[i].length > 4 && eachpart[i].includes("VV")) {
                     var num = eachpart[i].substring(2, 5);
                     if (num == "///") {
-                        finalVV += ("天空状况不明，且没有垂直能见度报告。");
+                        finalVV += (" 天空状况不明，且没有垂直能见度报告。");
                         console.log(finalVV);
                     } else {
                         var num = "" + parseInt(num) * 30;
@@ -683,7 +692,7 @@
                             num = "0" + num;
                         }
                         WordToOutput(num, [], function (data) {
-                            finalVV += ("垂直能见度为，" + data + "米。");
+                            finalVV += (" 垂直能见度为， " + data + " 米。");
                             console.log(finalVV);
                         });
                     }
@@ -698,28 +707,28 @@
                 if (eachpart[i] == "WS") {
                     let j = i + 1;
                     if (eachpart[j] == "ALL" || eachpart[j] == "All") {
-                        finalWS += ("风切变，全部跑道都存在。");
+                        finalWS += (" 风切变，全部跑道都存在。");
                         break;
                     } else {
-                        finalWS += ("存在风切变，");
+                        finalWS += (" 存在风切变，");
                         for (j = j; j < eachpart.length; j++) {
                             if (eachpart[j].includes("RWY")) {
                                 RunwayToOutput(eachpart[j].substring(3), [], function (data) {
-                                    finalWS += ("在跑道 " + data + "，");
+                                    finalWS += (" 在跑道 " + data + "，");
                                 });
                             } else if (eachpart[j].includes("LDG")) {
                                 RunwayToOutput(eachpart[j + 1].substring(3), [], function (data) {
-                                    finalWS += ("在着陆跑道 " + data + "，");
+                                    finalWS += (" 在着陆跑道 " + data + "，");
                                 });
                                 j += 1;
                             } else if (eachpart[j].includes("TKOF")) {
                                 RunwayToOutput(eachpart[j + 1].substring(3), [], function (data) {
-                                    finalWS += ("在起飞跑道 " + data + "，");
+                                    finalWS += (" 在起飞跑道 " + data + "，");
                                 });
                                 j += 1;
                             } else { }
                         }
-                        finalWS += ("中存在。");
+                        finalWS += (" 中存在。");
                     }
                 }
             }
@@ -747,6 +756,30 @@
             callback(finalsplit);
         }
 
+        function ReadingText(statue, value) {
+            let speech;
+            if (document.getElementById('ReadText').innerText == "") {
+                speech = new SpeechSynthesisUtterance(value);
+            } else {
+                speech = new SpeechSynthesisUtterance(document.getElementById('ReadText').innerText);
+            }
+
+            if (statue == 1) {
+                speechSynthesis.speak(speech);
+            } else if (statue == 2) {
+                speechSynthesis.cancel(speech);
+            } else if (statue == 3) {
+                speechSynthesis.pause(speech);
+            } else if (statue == 4) {
+                speechSynthesis.resume(speech);
+            } else {
+
+            }
+            speech.onend = (e) => {
+                speechSynthesis.cancel(speech);
+            }
+        }
+
         function processSearchText(searchtext, callback) {
             //https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA
             //https://aviationweather.gov/data/metar/
@@ -764,6 +797,8 @@
             ajaxAPI(text, ifneedajax, function (responseText) {
                 if (responseText == "err" && ifneedajax == true) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
+
+                    ReadingText(1, "");
                     return;
                 }
 
@@ -830,13 +865,13 @@
 
                 //ICAO
                 AirportICAO(rawtext[1], function (data) {
-                    Alltext += "所选机场Meter播报, " + data + "。 ";
+                    Alltext += "所选机场 Meter 播报, " + data + "。 ";
                     console.log(Alltext);
                 });
 
                 //通报时间
                 rawZuluTime(rawtext[2], function (data) {
-                    Alltext += "通报UTC时煎, " + data + "。 ";
+                    Alltext += "通报 U T C 时煎, " + data + "。 ";
                     console.log(Alltext);
                 });
 
@@ -945,12 +980,12 @@
                 for (let i = 0; i < temp.length; i++) {
                     finaltem += (jsonReading[temp[i]] + " ");
                 };
-                Alltext += (finaltem + "度。 ");
+                Alltext += (finaltem + " 度。 ");
 
                 for (let i = 0; i < dewp.length; i++) {
                     finaldewp += (jsonReading[dewp[i]] + " ");
                 };
-                Alltext += (finaldewp + "度。 ");
+                Alltext += (finaldewp + " 度。 ");
 
                 //气压
                 var finalaltim = "修正海压，";
@@ -1079,6 +1114,7 @@
             var arrForecast = [];
             if (searchtext == "" && metarall != "\n\n\n\n\n") {
                 document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
+                ReadingText(1, "");
                 return;
             }
 
@@ -1108,7 +1144,7 @@
             //通报时间及有效时间
             var taffinaltime = "";
             rawZuluTime(rawtext[2], function (data) {
-                taffinaltime += "通报UTC时煎, " + data + "。 ";
+                taffinaltime += "通报 U T C 时煎, " + data + "。 ";
                 console.log(taffinaltime);
             });
             //通报北京时间
@@ -1349,7 +1385,7 @@
             //Output
             console.log(tafall);
             document.getElementById('ReadText').innerText = metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
-
+            ReadingText(1, "");
         });
     </script>
 </body>
