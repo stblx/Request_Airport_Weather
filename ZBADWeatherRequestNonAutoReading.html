@@ -757,28 +757,42 @@
         }
 
         function ReadingText(statue, value) {
-            let speech;
             if (document.getElementById('ReadText').innerText == "") {
-                speech = new SpeechSynthesisUtterance(value);
+                const speech = new SpeechSynthesisUtterance(value);
                 console.log("none " + statue + " " + value);
+
+                if (statue == 1 || statue == "1") {
+                    speechSynthesis.speak(speech);
+                } else if (statue == 2 || statue == "2") {
+                    speechSynthesis.cancel(speech);
+                } else if (statue == 3 || statue == "3") {
+                    speechSynthesis.pause(speech);
+                } else if (statue == 4 || statue == "4") {
+                    speechSynthesis.resume(speech);
+                } else {
+
+                }
+                speech.onend = (e) => {
+                    speechSynthesis.cancel(speech);
+                }
             } else {
-                speech = new SpeechSynthesisUtterance(document.getElementById('ReadText').innerText);
+                const speech = new SpeechSynthesisUtterance(document.getElementById('ReadText').innerText);
                 console.log("have " + statue + " " + document.getElementById('ReadText').innerText);
-            }
 
-            if (statue == 1) {
-                speechSynthesis.speak(speech);
-            } else if (statue == 2) {
-                speechSynthesis.cancel(speech);
-            } else if (statue == 3) {
-                speechSynthesis.pause(speech);
-            } else if (statue == 4) {
-                speechSynthesis.resume(speech);
-            } else {
+                if (statue == 1 || statue == "1") {
+                    speechSynthesis.speak(speech);
+                } else if (statue == 2 || statue == "2") {
+                    speechSynthesis.cancel(speech);
+                } else if (statue == 3 || statue == "3") {
+                    speechSynthesis.pause(speech);
+                } else if (statue == 4 || statue == "4") {
+                    speechSynthesis.resume(speech);
+                } else {
 
-            }
-            speech.onend = (e) => {
-                speechSynthesis.cancel(speech);
+                }
+                speech.onend = (e) => {
+                    speechSynthesis.cancel(speech);
+                }
             }
         }
 
