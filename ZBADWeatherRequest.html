@@ -12,13 +12,13 @@
         <input type="submit" value="查询">
     </form>
     <br>
-    <button onclick='ReadingText(1,"数据正在获取解析中，请稍等。")'>朗读</button>
+    <button id="btnRead1" onclick='ReadingText(1,"数据正在获取解析中，请稍等。")'>朗读</button>
     <strong> </strong>
-    <button onclick='ReadingText(2,"数据正在获取解析中，请稍等。")'>停止</button>
+    <button id="btnRead2" onclick='ReadingText(2,"数据正在获取解析中，请稍等。")'>停止</button>
     <strong> </strong>
-    <button onclick='ReadingText(3,"数据正在获取解析中，请稍等。")'>暂停</button>
+    <button id="btnRead3" onclick='ReadingText(3,"数据正在获取解析中，请稍等。")'>暂停</button>
     <strong> </strong>
-    <button onclick='ReadingText(4,"数据正在获取解析中，请稍等。")'>继续</button>
+    <button id="btnRead4" onclick='ReadingText(4,"数据正在获取解析中，请稍等。")'>继续</button>
     <br>
     <p id="ReadText"></p>
 
@@ -799,8 +799,8 @@
             ajaxAPI(text, ifneedajax, function (responseText) {
                 if (responseText == "err" && ifneedajax == true) {
                     document.getElementById('ReadText').innerText = "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！";
-
-                    ReadingText(1, "\n\n\n\n\n\n\n\n机场输入错误，或查询不到机场数据！！！");
+                    var button = document.getElementById('btnRead1');
+                    button.click();
                     return;
                 }
 
@@ -1116,7 +1116,8 @@
             var arrForecast = [];
             if (searchtext == "" && metarall != "\n\n\n\n\n") {
                 document.getElementById('ReadText').innerText = metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
-                ReadingText(1, metarall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。");
+                var button = document.getElementById('btnRead1');
+                button.click();
                 return;
             }
 
@@ -1387,7 +1388,8 @@
             //Output
             console.log(tafall);
             document.getElementById('ReadText').innerText = metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。";
-            ReadingText(1, metarall + tafall + "\n\n\n\n已全部播报完毕，请确保已收到所有信息。");
+            var button = document.getElementById('btnRead1');
+            button.click();
         });
     </script>
 </body>
