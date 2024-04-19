@@ -1,6 +1,17 @@
 # Request_Airport_Weather 查询机场天气
 使用NOAA的数据，或自行输入数据，解析内容。
 
+Github Pages: 前两个自动阅读，后两个手动阅读
+
+https://stblx.github.io/Request_Airport_Weather/ZBAAWeatherRequest.html
+
+https://stblx.github.io/Request_Airport_Weather/ZBADWeatherRequest.html
+
+https://stblx.github.io/Request_Airport_Weather/ZBAAWeatherRequestNonAutoReading.html
+
+https://stblx.github.io/Request_Airport_Weather/ZBADWeatherRequestNonAutoReading.html
+
+
 更多讯息，请关注**B站** **三条波浪线**
 
 https://space.bilibili.com/452359038
