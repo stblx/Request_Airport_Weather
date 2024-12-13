@@ -225,7 +225,9 @@
                     document.write(dewp);
                     document.write("&");
                     document.write(altim);
-                    document.write("^");
+                    if(i + 1 != lenresparr){
+                        document.write("^");
+                    }
                 });
             });
         }
