@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //WIND
+        function WindAll(windalltext, callback) {
+            var bo = false;
+            for (let i = 1; i < windalltext.length; i++) {
+                if (windalltext[i].includes("KT") || windalltext[i].includes("MPS") || windalltext[i].includes("KMH")) {
+                    bo = true;
+                }
+            }
+            if (bo == false) {
+                return;
+            }
+
+            var finalWind = "";
+            var arrwindAll = [];
+            for (let i = 1; i < windalltext.length; i++) {
+                if (windalltext[i].length >= 7) {
+                    if (windalltext[i].includes("KT") || windalltext[i].includes("MPS") || windalltext[i].includes("KMH")) {
+                        arrwindAll.push(windalltext[i]);
+                        console.log(arrwindAll);
+                    }
+                }
+                if (windalltext[i].length == 7 && windalltext[i].substring(3, 4) == "V") {
+                    arrwindAll.push(windalltext[i]);
+                    console.log(arrwindAll);
+                }
+            }
+            console.log(arrwindAll);
+
+            windalltext = arrwindAll;
+
+            //一般参数
+            var strwindir = windalltext[0].substring(0, 3);//风向
+            var strwindpd = windalltext[0].substring(3, 5);//风速
+            var strwindgp = "";//阵风
+            var strwindpdtype = "";//单位
+            if (windalltext[0][5] == "G") {
+                strwindgp = windalltext[0].substring(6, 8);
+                strwindpdtype = windalltext[0].substring(8);
+            } else {
+                strwindpdtype = windalltext[0].substring(5);
+            }
+
+            //判断 风向 ir
+            finalWind += (strwindpdtype + "*");
+            if (strwindir == "VRB") {
+                finalWind += "VRB*";
+                finalWind += (strwindpd + "*" + strwindpd);
+            } else if (strwindpd == "00") {
+                finalWind += ("000*00*00");
+            } else {
+                if (strwindir.length == 1) {
+                    finalWind += ("00");
+                }
+                if (strwindir.length == 2) {
+                    finalWind += ("0");
+                }
+                finalWind += (strwindir + "*");
+
+                //风速 pd
+                finalWind += (strwindpd + "*");
+
+                if (strwindgp == "") {
+                    strwindgp = strwindpd;
+                }
+                //阵风 gp
+                finalWind += (strwindgp);
+            }
+            callback(finalWind);
+        }
+
+        function visibdis(arrvisib, callback) {
+            var finalvisib = "";
+            var strvisib = "";
+            for (let i = 2; i < arrvisib.length; i++) {
+                if (/^\d{4}$/.test(arrvisib[i])) {
+                    strvisib = arrvisib[i].toString();
+                } else if (arrvisib[i].includes("SM")) {
+                    strvisib = arrvisib[i].toString();
+                } else if (arrvisib[i].includes("CAVOK")) {
+                    callback("CAVOK");
+                }
+                else {
+                    continue;
+                }
+            }
+            if (strvisib == "") {
+                return;
+            }
+
+            if (strvisib.includes("SM")) {
+                finalvisib = "S*";
+                if (strvisib.includes("P6")) {
+                    finalvisib += 6;
+                } else if (strvisib.includes("\\")) {
+                    finalvisib += strvisib.split("\\")[0];
+                } else {
+                    strvisib = strvisib.split("SM")[0];
+                    finalvisib = strvisib;
+                }
+            } else {
+                finalvisib = "K*";
+                if (strvisib == "9999") {
+                    finalvisib += 10;
+                } else if (strvisib == "0000" || parseInt(strvisib) < 50) {
+                    finalvisib += 0;
+                } else {
+                    finalvisib += (parseFloat(strvisib) / 1000);
+                }
+            }
+
+            callback(finalvisib);
+        }
+
+        //MAIN
+        var locationS = this.location.search.substring(1);
+        var resparr = locationS.split("&");
+        var lenresparr = resparr.length;
+
+        document.body.innerHTML = "";
+
+        for (let i = 0; i < lenresparr; i++) {
+            var rawtext = resparr[i];
+            if (rawtext.includes("BECMG")) {
+                rawtext = rawtext.substring(0, rawtext.indexOf("BECMG") - 1);
+            } else if (rawtext.substring(10).includes("FM")) {
+                rawtext = rawtext.substring(0, rawtext.indexOf("FM") - 1);
+            } else if (rawtext.substring(10).includes("TL")) {
+                rawtext = rawtext.substring(0, rawtext.indexOf("TL") - 1);
+            } else if (rawtext.substring(10).includes("AT")) {
+                rawtext = rawtext.substring(0, rawtext.indexOf("AT") - 1);
+            } else if (rawtext.substring(10).includes("TEMPO")) {
+                rawtext = rawtext.substring(0, rawtext.indexOf("TEMPO") - 1);
+            } else if (rawtext.substring(10).includes("RMK")) {
+                rawtext = rawtext.substring(0, rawtext.indexOf("RMK") - 1);
+            } else { }
+            var textsplitedbyspace = rawtext.split('+');
+
+            //UTC时间
+            var timeUTC = textsplitedbyspace[1].substring(0, 6);
+
+            //温度&湿度
+            var temp = 0;
+            var dewp = 0;
+
+            for (let i = 2; i < textsplitedbyspace.length; i++) {
+                let arrTempRawTXT = textsplitedbyspace[i];
+                if (arrTempRawTXT.includes("/")) {
+                    var stemp = arrTempRawTXT.split("/")[0];
+                    var sdewp = arrTempRawTXT.split("/")[1];
+
+                    if (stemp[0] == "M" && stemp.length == 3) {
+                        if (/^\d{2}$/.test(stemp.substring(1, 3))) {
+                            temp = "-" + stemp.substring(1, 3);
+                        } else {
+                            continue;
+                        }
+                    } else if (stemp.length == 2) {
+                        if (/^\d{2}$/.test(stemp)) {
+                            temp = stemp;
+                        } else {
+                            continue;
+                        }
+                    } else { }
+
+                    if (sdewp[0] == "M" && sdewp.length == 3) {
+                        if (/^\d{2}$/.test(sdewp.substring(1, 3))) {
+                            dewp = "-" + sdewp.substring(1, 3);
+                        } else {
+                            continue;
+                        }
+                    } else if (sdewp.length == 2)
+                        if (/^\d{2}$/.test(sdewp)) {
+                            dewp = sdewp;
+                        } else {
+                            continue;
+                        }
+                } else { }
+            }
+
+            //QNH气压
+            var altim = "";
+            for (let i = 2; i < textsplitedbyspace.length; i++) {
+                if (textsplitedbyspace[i].length == 5) {
+                    if (textsplitedbyspace[i][0] == "Q") {
+                        if (/^\d{4}$/.test(textsplitedbyspace[i].substring(1))) {
+                            altim = textsplitedbyspace[i].substring(1);
+                            break;
+                        } else {
+                            continue;
+                        }
+                    }
+                    if (textsplitedbyspace[i][0] == "A") {
+                        if (/^\d{4}$/.test(textsplitedbyspace[i].substring(1))) {
+                            altim = textsplitedbyspace[i].substring(1);
+                            break;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            //WIND
+            WindAll(textsplitedbyspace, function (dataWind) {
+                visibdis(textsplitedbyspace, function (dataVis) {
+                    document.write(timeUTC);
+                    document.write("&");
+                    document.write(dataWind);
+                    document.write("&");
+                    document.write(dataVis);
+                    document.write("&");
+                    document.write(temp);
+                    document.write("&");
+                    document.write(dewp);
+                    document.write("&");
+                    document.write(altim);
+                    document.write("^");
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
