@@ -11,6 +11,7 @@ Github Pages: 前两个自动阅读，后两个手动阅读
 
 <https://stblx.github.io/Request_Airport_Weather/ZBADWeatherRequestNonAutoReading.html>
 
+<https://stblx.github.io/Request_Airport_Weather/MetarApi.html>
 
 更多讯息，请关注**B站** **三条波浪线**
 
