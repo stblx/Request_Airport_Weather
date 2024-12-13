@@ -194,7 +194,7 @@
                 if (textsplitedbyspace[i].length == 5) {
                     if (textsplitedbyspace[i][0] == "Q") {
                         if (/^\d{4}$/.test(textsplitedbyspace[i].substring(1))) {
-                            altim = textsplitedbyspace[i].substring(1);
+                            altim = "Q*" + textsplitedbyspace[i].substring(1);
                             break;
                         } else {
                             continue;
@@ -202,7 +202,7 @@
                     }
                     if (textsplitedbyspace[i][0] == "A") {
                         if (/^\d{4}$/.test(textsplitedbyspace[i].substring(1))) {
-                            altim = textsplitedbyspace[i].substring(1);
+                            altim = "A*" + textsplitedbyspace[i].substring(1);
                             break;
                         } else {
                             continue;
