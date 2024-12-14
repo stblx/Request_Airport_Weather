@@ -88,7 +88,7 @@
                 } else if (arrvisib[i].includes("SM")) {
                     strvisib = arrvisib[i].toString();
                 } else if (arrvisib[i].includes("CAVOK")) {
-                    callback("CAVOK");
+                    callback("K*10");
                 }
                 else {
                     continue;
@@ -106,7 +106,7 @@
                     finalvisib += strvisib.split("\\")[0];
                 } else {
                     strvisib = strvisib.split("SM")[0];
-                    finalvisib = strvisib;
+                    finalvisib += strvisib;
                 }
             } else {
                 finalvisib = "K*";
@@ -220,9 +220,7 @@
                     document.write("&");
                     document.write(dataVis);
                     document.write("&");
-                    document.write(temp);
-                    document.write("&");
-                    document.write(dewp);
+                    document.write(temp + "*" + dewp);
                     document.write("&");
                     document.write(altim);
                     if(i + 1 != lenresparr){
