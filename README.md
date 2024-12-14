@@ -13,6 +13,8 @@ Github Pages: 前两个自动阅读，后两个手动阅读
 
 <https://stblx.github.io/Request_Airport_Weather/MetarAPI.html>
 
+Data: <https://aviationweather.gov/cgi-bin/data/metar.php?ids=ZBAA&hours=0>
+
 更多讯息，请关注**B站** **三条波浪线**
 
 <https://space.bilibili.com/452359038>
